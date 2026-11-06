@@ -6,11 +6,15 @@ Live demo (portfolio): https://qrcodegen-arxcode.vercel.app/
 
 ## Fitur
 
-- Static QR: URL/teks/WiFi/vCard, warna, logo tengah, ECC L/M/Q/H, export PNG/SVG
-- Dynamic QR + short link: alias custom, expiry, edit target, hapus
+- Static QR: URL/teks/WiFi/vCard, warna, logo tengah, frame + caption,
+  ECC L/M/Q/H, export PNG 256/512/1024 + SVG
+- Dynamic QR + short link: alias custom, expiry, password link, edit target, hapus
 - Redirect `/r/:slug` + counter klik + log scan (device, UA, IP)
-- Dashboard: list link, grafik scan 7 hari, 30 scan terakhir
+- Public stats `/s/:slug` — halaman scan publik per link
+- Dashboard: list link (gembok + stats), bulk CSV 100/batch, grafik 7 hari, 30 scan terakhir
 - Keamanan: rate limit 20 create/jam/user, blocklist domain
+- API: key per user (`Authorization: Bearer qrgen_...`), POST/GET /api/links
+- Freemium: landing 3x QR anonim (localStorage), login = unlimited
 - Auth: email + password (Supabase)
 
 ## Self-host (5 menit)
