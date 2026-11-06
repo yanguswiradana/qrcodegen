@@ -115,15 +115,27 @@ export default function QrStaticForm({
           className="qr-input"
         />
         <div className="flex flex-wrap gap-2">
-          <label className="text-sm">
-            Warna <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+          <label className="qr-swatch">
+            <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+            Warna
           </label>
-          <label className="text-sm">
-            Latar <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} />
+          <label className="qr-swatch">
+            <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} />
+            Latar
           </label>
-          <label className="text-sm">
-            Logo <input type="file" accept="image/*" onChange={onLogo} className="text-xs" />
+          <label className="qr-file">
+            <input type="file" accept="image/*" onChange={onLogo} />
+            {logoPreview ? "Ganti logo" : "＋ Logo"}
           </label>
+          {logoPreview && (
+            <button
+              type="button"
+              onClick={() => setLogoPreview("")}
+              className="qr-btn-ghost !py-1.5 text-xs text-red-400"
+            >
+              Hapus logo
+            </button>
+          )}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <label className="flex items-center gap-1">
