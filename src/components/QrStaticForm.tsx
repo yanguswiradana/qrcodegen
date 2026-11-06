@@ -3,18 +3,57 @@
 import { useState } from "react";
 import { toPngDataUrl, toSvg } from "@/lib/qr";
 
+function drawLogo(img: HTMLImageElement, png: string): Promise<string> {
+  return new Promise((resolve) => {
+    const qr = new Image();
+    qr.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = qr.width;
+      c.height = qr.height;
+      const ctx = c.getContext("2d")!;
+      ctx.drawImage(qr, 0, 0);
+      // Logo box: putus agar QR tetap terbaca (ECC M+ disarankan).
+      const box = qr.width * 0.26;
+      const x = (qr.width - box) / 2;
+      const y = (qr.height - box) / 2;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(x, y, box, box);
+      const pad = box * 0.12;
+      ctx.drawImage(img, x + pad, y + pad, box - pad * 2, box - pad * 2);
+      resolve(c.toDataURL("image/png"));
+    };
+    qr.src = png;
+  });
+}
+
 export default function QrStaticForm() {
   const [text, setText] = useState("https://");
   const [color, setColor] = useState("#000000");
   const [bg, setBg] = useState("#ffffff");
   const [png, setPng] = useState("");
   const [svg, setSvg] = useState("");
+  const [logoPreview, setLogoPreview] = useState("");
 
   async function gen(ecc: "L" | "M" | "Q" | "H" = "M") {
     if (!text.trim()) return;
     const style = { color, bg, ecc };
-    setPng(await toPngDataUrl(text, style));
+    let out = await toPngDataUrl(text, style);
     setSvg(await toSvg(text, style));
+    if (logoPreview) {
+      const logo = new Image();
+      logo.onload = async () => setPng(await drawLogo(logo, out));
+      logo.src = logoPreview;
+    } else {
+      setPng(out);
+    }
+  }
+
+  function onLogo(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return setLogoPreview("");
+    const reader = new FileReader();
+    reader.onload = () => setLogoPreview(String(reader.result));
+    reader.readAsDataURL(f);
   }
 
   function download(href: string, name: string) {
@@ -41,6 +80,9 @@ export default function QrStaticForm() {
           <label className="text-sm">
             Latar <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} />
           </label>
+          <label className="text-sm">
+            Logo <input type="file" accept="image/*" onChange={onLogo} className="text-xs" />
+          </label>
         </div>
         <div className="flex gap-2">
           {(["L", "M", "Q", "H"] as const).map((e) => (
@@ -52,6 +94,11 @@ export default function QrStaticForm() {
             Buat
           </button>
         </div>
+        {logoPreview && (
+          <p className="text-xs text-amber-700">
+            Logo aktif — pakai ECC M/Q/H agar tetap terbaca.
+          </p>
+        )}
       </div>
 
       {png && (

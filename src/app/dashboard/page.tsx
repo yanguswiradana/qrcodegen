@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import QrStaticForm from "@/components/QrStaticForm";
 import QrDynamicForm from "@/components/QrDynamicForm";
 import LinksList from "@/components/LinksList";
+import ScansPanel from "@/components/ScansPanel";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -40,6 +41,11 @@ export default async function DashboardPage() {
       <div className="mt-8">
         <h2 className="font-semibold">Short link</h2>
         <LinksList />
+      </div>
+
+      <div className="mt-8">
+        <h2 className="font-semibold">Scan terakhir</h2>
+        <ScansPanel />
       </div>
     </main>
   );

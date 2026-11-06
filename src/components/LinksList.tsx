@@ -1,11 +1,14 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+import LinkRowActions from "@/components/LinkRowActions";
 import QrDownloadButton from "@/components/QrDownloadButton";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function LinksList() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("links")
-    .select("slug, target_url, clicks, created_at")
+    .select("slug, target_url, clicks, expires_at, created_at")
     .order("created_at", { ascending: false })
     .limit(20);
 
@@ -22,7 +25,9 @@ export default async function LinksList() {
             <th className="p-2">Slug</th>
             <th className="p-2">Tujuan</th>
             <th className="p-2">Klik</th>
+            <th className="p-2">Expired</th>
             <th className="p-2">QR</th>
+            <th className="p-2">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -35,8 +40,16 @@ export default async function LinksList() {
               </td>
               <td className="max-w-64 truncate p-2">{l.target_url}</td>
               <td className="p-2">{l.clicks}</td>
+              <td className="p-2 text-xs">
+                {l.expires_at
+                  ? new Date(l.expires_at).toLocaleDateString("id-ID")
+                  : "-"}
+              </td>
               <td className="p-2">
                 <QrDownloadButton slug={l.slug} />
+              </td>
+              <td className="p-2">
+                <LinkRowActions slug={l.slug} targetUrl={l.target_url} />
               </td>
             </tr>
           ))}

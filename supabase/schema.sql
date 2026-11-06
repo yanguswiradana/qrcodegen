@@ -9,6 +9,7 @@ create table if not exists public.links (
   target_url text not null,
   title text,
   clicks bigint not null default 0,
+  expires_at timestamptz null,
   created_by uuid not null references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
 );
