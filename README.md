@@ -2,7 +2,7 @@
 
 QR generator + short link satu dashboard. Static QR instan, dynamic QR via redirect `/r/:slug` dengan tracking scan. Stack: Next.js 16 + Supabase (Postgres + Auth).
 
-Live demo (portfolio): tambahkan URL Vercel Sir di sini.
+Live demo (portfolio): https://qrcodegen-rosy-three.vercel.app/
 
 ## Fitur
 
