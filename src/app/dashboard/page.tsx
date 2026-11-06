@@ -4,6 +4,7 @@ import QrStaticForm from "@/components/QrStaticForm";
 import QrDynamicForm from "@/components/QrDynamicForm";
 import LinksList from "@/components/LinksList";
 import ScansPanel from "@/components/ScansPanel";
+import ScansChart from "@/components/ScansChart";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -45,6 +46,7 @@ export default async function DashboardPage() {
 
       <div className="mt-8">
         <h2 className="font-semibold">Scan terakhir</h2>
+        <ScansChart />
         <ScansPanel />
       </div>
     </main>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toPngDataUrl } from "@/lib/qr";
+import { shortBase } from "@/lib/short";
 
 export default function QrDownloadButton({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(false);
@@ -9,7 +10,7 @@ export default function QrDownloadButton({ slug }: { slug: string }) {
   async function download() {
     setLoading(true);
     try {
-      const url = `${location.origin}/r/${slug}`;
+      const url = `${shortBase()}/r/${slug}`;
       const png = await toPngDataUrl(url, { ecc: "M" });
       const a = document.createElement("a");
       a.href = png;

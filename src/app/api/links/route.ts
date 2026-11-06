@@ -23,6 +23,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "URL tidak valid" }, { status: 400 });
   }
 
+  // Blocklist: tolak host berbahaya / shortener loop.
+  try {
+    const host = new URL(targetUrl).hostname.toLowerCase().replace(/^www\./, "");
+    const { data: blocked } = await supabase
+      .from("blocked_hosts")
+      .select("host")
+      .eq("host", host)
+      .maybeSingle();
+    if (blocked)
+      return NextResponse.json({ error: "Domain diblokir" }, { status: 403 });
+  } catch {
+    /* URL sudah divalidasi di atas */
+  }
+
+  // Rate limit: 20 create/jam per user.
+  const { data: allowed } = await supabase.rpc("check_rate", {
+    p_key: `create:${user.id}`,
+    p_limit: 20,
+    p_window_secs: 3600,
+  });
+  if (allowed === false)
+    return NextResponse.json(
+      { error: "Batas 20 link/jam, coba lagi nanti" },
+      { status: 429 }
+    );
+
   if (alias && !ALIAS_RE.test(alias)) {
     return NextResponse.json(
       { error: "Alias 3-32 char: huruf, angka, - _ saja" },
