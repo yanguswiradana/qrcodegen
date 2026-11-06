@@ -56,6 +56,6 @@ export default async function RedirectPage({
     if (ok !== true) return <PasswordGate slug={slug} error="Password salah" />;
   }
 
-  await track(slug, ua, ip);
+  await track(slug, ua, ip ?? undefined);
   redirect(link.target_url);
 }

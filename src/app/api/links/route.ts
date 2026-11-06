@@ -4,6 +4,8 @@ import { genSlug } from "@/lib/slug";
 
 import { createHash } from "node:crypto";
 
+const ALIAS_RE = /^[a-zA-Z0-9_-]{3,32}$/;
+
 async function sha256(s: string) {
   return createHash("sha256").update(s).digest("hex");
 }
