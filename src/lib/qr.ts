@@ -5,6 +5,7 @@ export type QrStyle = {
   bg?: string;
   ecc?: "L" | "M" | "Q" | "H";
   margin?: number;
+  width?: number;
 };
 
 export function toPngDataUrl(text: string, style: QrStyle = {}) {
@@ -12,7 +13,7 @@ export function toPngDataUrl(text: string, style: QrStyle = {}) {
     errorCorrectionLevel: style.ecc ?? "M",
     color: { dark: style.color ?? "#000000", light: style.bg ?? "#ffffff" },
     margin: style.margin ?? 2,
-    width: 512,
+    width: style.width ?? 512,
   });
 }
 
