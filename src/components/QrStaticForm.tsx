@@ -58,9 +58,10 @@ export default function QrStaticForm({
   onGenerated?: () => void;
   disabled?: boolean;
 } = {}) {
-  const [text, setText] = useState("https://");
+  const [text, setText] = useState("");
   const [color, setColor] = useState("#000000");
   const [bg, setBg] = useState("#ffffff");
+  const [ecc, setEcc] = useState<"L" | "M" | "Q" | "H">("M");
   const [frame, setFrame] = useState(true);
   const [caption, setCaption] = useState("SCAN ME");
   const [size, setSize] = useState(512);
@@ -68,7 +69,9 @@ export default function QrStaticForm({
   const [svg, setSvg] = useState("");
   const [logoPreview, setLogoPreview] = useState("");
 
-  async function gen(ecc: "L" | "M" | "Q" | "H" = "M") {
+  // Hanya tombol "Buat" yang memicu generate + hitung kuota.
+  // Pilihan ECC/warna/frame cuma ubah state, tidak generate ulang.
+  async function gen() {
     if (!text.trim() || disabled) return;
     const style = { color, bg, ecc };
     let out = await toPngDataUrl(text, { ...style, width: size });
@@ -162,11 +165,21 @@ export default function QrStaticForm({
         </div>
         <div className="flex gap-2">
           {(["L", "M", "Q", "H"] as const).map((e) => (
-            <button key={e} onClick={() => gen(e)} className="qr-btn-ghost">
+            <button
+              key={e}
+              type="button"
+              onClick={() => setEcc(e)}
+              title={`Koreksi error ${e}`}
+              className={e === ecc ? "qr-btn" : "qr-btn-ghost"}
+            >
               {e}
             </button>
           ))}
-          <button onClick={() => gen()} className="qr-btn">
+          <button
+            onClick={() => gen()}
+            disabled={!text.trim() || disabled}
+            className="qr-btn disabled:opacity-50"
+          >
             Buat
           </button>
         </div>
