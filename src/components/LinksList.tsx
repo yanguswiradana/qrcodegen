@@ -7,7 +7,7 @@ export default async function LinksList() {
     .from("links")
     .select("slug, target_url, clicks, expires_at, created_at, password_hash")
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(200);
 
   const rows = (data ?? []).map((l) => ({
     ...l,
