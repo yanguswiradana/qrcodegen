@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import QrStaticForm from "@/components/QrStaticForm";
 import QrDynamicForm from "@/components/QrDynamicForm";
+import BulkCreate from "@/components/BulkCreate";
 import LinksList from "@/components/LinksList";
 import ScansPanel from "@/components/ScansPanel";
 import ScansChart from "@/components/ScansChart";
@@ -37,6 +38,10 @@ export default async function DashboardPage() {
 
       <div className="mt-6">
         <QrDynamicForm />
+      </div>
+
+      <div className="mt-6">
+        <BulkCreate />
       </div>
 
       <div className="mt-8">
