@@ -60,9 +60,9 @@ export default function BulkCreate() {
   }
 
   return (
-    <div className="rounded border p-4">
+    <div className="qr-card p-5">
       <h2 className="font-semibold">Bulk create (CSV)</h2>
-      <p className="mt-1 text-xs text-zinc-500">
+      <p className="mt-1 text-xs text-zinc-400">
         Format: url,alias (baris pertama boleh header). Max 100/baris. Rate limit
         20/jam tetap berlaku.
       </p>
@@ -72,7 +72,7 @@ export default function BulkCreate() {
           <button
             onClick={run}
             disabled={running}
-            className="rounded bg-black px-4 py-1.5 text-sm text-white disabled:opacity-50"
+            className="qr-btn text-sm disabled:opacity-50"
           >
             {running ? `${done}/${rows.length}...` : `Buat ${rows.length} link`}
           </button>
@@ -80,10 +80,10 @@ export default function BulkCreate() {
       </div>
       {rows.length > 0 && (
         <div className="mt-3 max-h-64 overflow-y-auto text-xs">
-          <table className="w-full">
+          <table className="qr-table w-full">
             <tbody>
               {rows.map((r, i) => (
-                <tr key={i} className="border-t">
+                <tr key={i}>
                   <td className="max-w-48 truncate p-1">{r.url}</td>
                   <td className="p-1 font-mono">{r.alias || "-"}</td>
                   <td className="p-1">

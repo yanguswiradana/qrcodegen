@@ -29,7 +29,7 @@ export default function FreeQrGate() {
   return (
     <div className="mt-10">
       <div className="mb-3 text-sm">
-        <p className="text-zinc-600">
+        <p className="text-zinc-400">
           {locked
             ? "Kuota gratis habis (3/3)."
             : `Coba gratis: sisa ${left} dari ${LIMIT} QR.`}
@@ -37,9 +37,9 @@ export default function FreeQrGate() {
       </div>
 
       {locked ? (
-        <div className="rounded border p-6 text-center">
+        <div className="qr-card p-5 text-center">
           <p className="font-semibold">Kuota coba gratis habis</p>
-          <p className="mt-1 text-sm text-zinc-600">
+          <p className="mt-1 text-sm text-zinc-400">
             Refresh halaman untuk coba lagi, atau hubungi pemilik untuk akses penuh.
           </p>
         </div>

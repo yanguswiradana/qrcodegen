@@ -38,10 +38,10 @@ export default async function StatsPage({
 
   return (
     <main className="mx-auto max-w-xl px-6 py-16">
-      <p className="font-mono text-sm text-zinc-500">/r/{row.slug}</p>
+      <p className="font-mono text-sm text-zinc-400">/r/{row.slug}</p>
       <h1 className="mt-1 text-3xl font-bold">{row.clicks} scan</h1>
-      <p className="mt-1 truncate text-sm text-zinc-600">{row.target_url}</p>
-      <p className="mt-1 text-xs text-zinc-500">
+      <p className="mt-1 truncate text-sm text-zinc-400">{row.target_url}</p>
+      <p className="mt-1 text-xs text-zinc-400">
         Dibuat {new Date(row.created_at).toLocaleDateString("id-ID")}
         {devices.length > 0 &&
           " · " + devices.map(([k, v]) => `${k}: ${v}`).join(" · ")}
@@ -52,23 +52,23 @@ export default async function StatsPage({
           <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
             <span className="font-mono text-xs">{d.count}</span>
             <div
-              className="w-full rounded-t bg-black"
+              className="w-full rounded-t bg-[var(--accent)]"
               style={{ height: `${Math.max(4, (d.count / max) * 90)}px` }}
             />
-            <span className="text-[11px] text-zinc-500">{d.label}</span>
+            <span className="text-[11px] text-zinc-400">{d.label}</span>
           </div>
         ))}
       </div>
 
       <div className="mt-8 flex gap-3 text-sm">
-        <a href={`/r/${row.slug}`} className="rounded bg-black px-4 py-2 text-white">
+        <a href={`/r/${row.slug}`} className="qr-btn">
           Buka link
         </a>
-        <Link href="/" className="rounded border px-4 py-2">
+        <Link href="/" className="qr-btn-ghost">
           Buat punyamu
         </Link>
       </div>
-      <p className="mt-6 text-xs text-zinc-500">
+      <p className="mt-6 text-xs text-zinc-400">
         Dibuat dengan QRGen — self-hostable (MIT).
       </p>
     </main>

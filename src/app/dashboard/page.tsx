@@ -30,11 +30,11 @@ export default async function DashboardPage() {
         <div className="flex gap-2">
           <ApiKeys />
           <form action={logout}>
-            <button className="rounded border px-3 py-1.5 text-sm">Keluar</button>
+            <button className="qr-btn-ghost text-sm">Keluar</button>
           </form>
         </div>
       </div>
-      <p className="mt-1 text-sm text-zinc-600">{user.email}</p>
+      <p className="mt-1 text-sm text-zinc-400">{user.email}</p>
 
       <div className="mt-6">
         <QrStaticForm />
@@ -49,12 +49,12 @@ export default async function DashboardPage() {
       </div>
 
       <div className="mt-8">
-        <h2 className="font-semibold">Short link</h2>
+        <h2 className="text-lg font-semibold">Short link</h2>
         <LinksList />
       </div>
 
       <div className="mt-8">
-        <h2 className="font-semibold">Scan terakhir</h2>
+        <h2 className="text-lg font-semibold">Scan terakhir</h2>
         <ScansChart />
         <ScansPanel />
       </div>

@@ -48,26 +48,26 @@ export default function LoginPage() {
       <div className="mt-4 flex gap-2 text-sm">
         <button
           onClick={() => setMode("signin")}
-          className={`rounded border px-3 py-1 ${mode === "signin" ? "bg-black text-white" : ""}`}
+          className={mode === "signin" ? "qr-btn px-3 py-1" : "qr-btn-ghost px-3 py-1"}
         >
           Masuk
         </button>
         <button
           onClick={() => setMode("signup")}
-          className={`rounded border px-3 py-1 ${mode === "signup" ? "bg-black text-white" : ""}`}
+          className={mode === "signup" ? "qr-btn px-3 py-1" : "qr-btn-ghost px-3 py-1"}
         >
           Daftar
         </button>
       </div>
 
-      <form onSubmit={submit} className="mt-6 flex flex-col gap-3">
+      <form onSubmit={submit} className="qr-card p-5 mt-6 flex flex-col gap-3">
         <input
           type="email"
           required
           placeholder="email@contoh.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded border px-3 py-2"
+          className="qr-input"
         />
         <input
           type="password"
@@ -76,18 +76,18 @@ export default function LoginPage() {
           placeholder="Password (min 6)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded border px-3 py-2"
+          className="qr-input"
         />
         <button
           disabled={loading}
-          className="rounded bg-black py-2 text-white disabled:opacity-50"
+          className="qr-btn py-2 disabled:opacity-50"
         >
           {loading ? "..." : mode === "signin" ? "Masuk" : "Buat akun"}
         </button>
       </form>
 
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
-      {info && <p className="mt-4 text-sm text-green-700">{info}</p>}
+      {info && <p className="mt-4 text-sm text-green-400">{info}</p>}
     </main>
   );
 }

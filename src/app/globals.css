@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #09090f;
+  --foreground: #f4f4f5;
+  --muted: #a1a1aa;
+  --card: #12121b;
+  --line: #26262f;
+  --accent: #bef264;
+  --accent-ink: #101006;
 }
 
 @theme inline {
@@ -12,15 +17,73 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background:
+    radial-gradient(60rem 30rem at 50% -10rem, #1e2a10 0%, transparent 60%),
+    radial-gradient(40rem 24rem at 90% 10%, #172554 0%, transparent 55%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-body {
-  background: var(--background);
+.qr-card {
+  background: linear-gradient(180deg, #15151f 0%, #101017 100%);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}
+
+.qr-input {
+  background: #0c0c12;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  width: 100%;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+.qr-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.qr-btn {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+  border-radius: 0.6rem;
+  padding: 0.55rem 1.1rem;
+  transition: filter 0.15s;
+}
+.qr-btn:hover {
+  filter: brightness(1.1);
+}
+.qr-btn:disabled {
+  opacity: 0.5;
+}
+
+.qr-btn-ghost {
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  padding: 0.55rem 1.1rem;
+  color: var(--foreground);
+}
+.qr-btn-ghost:hover {
+  border-color: var(--accent);
+}
+
+.qr-table th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.qr-table td,
+.qr-table th {
+  padding: 0.6rem 0.75rem;
+}
+.qr-table tbody tr {
+  border-top: 1px solid var(--line);
+}
+.qr-table tbody tr:hover {
+  background: #17171f;
 }

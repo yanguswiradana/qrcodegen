@@ -35,7 +35,7 @@ export default function QrDynamicForm() {
   }
 
   return (
-    <div className="rounded border p-4">
+    <div className="qr-card p-5">
       <h2 className="font-semibold">Dynamic QR + short link</h2>
       <form onSubmit={submit} className="mt-3 flex flex-col gap-2">
         <input
@@ -43,36 +43,36 @@ export default function QrDynamicForm() {
           onChange={(e) => setUrl(e.target.value)}
           required
           placeholder="https://tujuan..."
-          className="rounded border px-3 py-2"
+          className="qr-input"
         />
         <div className="flex gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nama (opsional)"
-            className="rounded border px-3 py-2 flex-1"
+            className="qr-input flex-1"
           />
           <input
             value={alias}
             onChange={(e) => setAlias(e.target.value)}
             placeholder="alias (opsional)"
-            className="w-36 rounded border px-3 py-2 font-mono text-sm"
+            className="qr-input w-36 font-mono text-sm"
           />
         </div>
         <input
           type="datetime-local"
           value={expiresAt}
           onChange={(e) => setExpiresAt(e.target.value)}
-          className="rounded border px-3 py-2 text-sm"
+          className="qr-input text-sm"
         />
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password link (opsional)"
-          className="rounded border px-3 py-2 text-sm"
+          className="qr-input text-sm"
         />
-        <button disabled={loading} className="rounded bg-black py-2 text-white disabled:opacity-50">
+        <button disabled={loading} className="qr-btn disabled:opacity-50">
           {loading ? "Membuat..." : "Buat link + QR"}
         </button>
       </form>

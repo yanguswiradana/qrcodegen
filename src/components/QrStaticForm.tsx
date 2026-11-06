@@ -105,14 +105,14 @@ export default function QrStaticForm({
   }
 
   return (
-    <div className="rounded border p-4">
+    <div className="qr-card p-5">
       <h2 className="font-semibold">Static QR</h2>
       <div className="mt-3 flex flex-col gap-2">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="URL / teks / WiFi / vCard..."
-          className="rounded border px-3 py-2"
+          className="qr-input"
         />
         <div className="flex flex-wrap gap-2">
           <label className="text-sm">
@@ -135,13 +135,13 @@ export default function QrStaticForm({
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="Teks frame"
-              className="w-32 rounded border px-2 py-1 text-sm"
+              className="qr-input w-32 text-sm"
             />
           )}
           <select
             value={size}
             onChange={(e) => setSize(Number(e.target.value))}
-            className="rounded border px-2 py-1 text-sm"
+            className="qr-input w-auto text-sm"
           >
             <option value={256}>256px</option>
             <option value={512}>512px</option>
@@ -150,11 +150,11 @@ export default function QrStaticForm({
         </div>
         <div className="flex gap-2">
           {(["L", "M", "Q", "H"] as const).map((e) => (
-            <button key={e} onClick={() => gen(e)} className="rounded border px-3 py-1.5">
+            <button key={e} onClick={() => gen(e)} className="qr-btn-ghost">
               {e}
             </button>
           ))}
-          <button onClick={() => gen()} className="rounded bg-black px-4 py-1.5 text-white">
+          <button onClick={() => gen()} className="qr-btn">
             Buat
           </button>
         </div>
@@ -170,14 +170,14 @@ export default function QrStaticForm({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={png} alt="QR" className="h-48 w-48 border" />
           <div className="flex flex-col gap-2">
-            <button onClick={() => download(png, `qr-${size}.png`)} className="rounded bg-black px-4 py-1.5 text-white">
+            <button onClick={() => download(png, `qr-${size}.png`)} className="qr-btn">
               PNG {size}px
             </button>
             <button
               onClick={() =>
                 download("data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg), "qr.svg")
               }
-              className="rounded border px-4 py-1.5"
+              className="qr-btn-ghost"
             >
               SVG
             </button>

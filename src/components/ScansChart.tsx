@@ -23,17 +23,17 @@ export default async function ScansChart() {
   const max = Math.max(1, ...days.map((d) => d.count));
 
   return (
-    <div className="mt-4 rounded border p-4">
-      <h3 className="text-sm font-semibold">Scan 7 hari</h3>
+    <div className="mt-4 qr-card p-5">
+      <h3 className="text-lg font-semibold">Scan 7 hari</h3>
       <div className="mt-3 flex h-28 items-end gap-2">
         {days.map((d) => (
           <div key={d.label} className="flex flex-1 flex-col items-center gap-1">
             <span className="text-xs font-mono">{d.count}</span>
             <div
-              className="w-full rounded-t bg-black"
+              className="w-full rounded-t bg-[var(--accent)]"
               style={{ height: `${Math.max(4, (d.count / max) * 90)}px` }}
             />
-            <span className="text-[11px] text-zinc-500">{d.label}</span>
+            <span className="text-[11px] text-zinc-400">{d.label}</span>
           </div>
         ))}
       </div>

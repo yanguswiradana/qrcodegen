@@ -54,13 +54,13 @@ export default function LinkRowActions({
             setUrl(targetUrl);
             setEditing(true);
           }}
-          className="rounded border px-2 py-1 text-xs"
+          className="qr-btn-ghost px-2 py-1 text-xs"
         >
           Edit
         </button>
         <button
           onClick={remove}
-          className="rounded border px-2 py-1 text-xs text-red-600"
+          className="qr-btn-ghost px-2 py-1 text-xs text-red-600"
         >
           Hapus
         </button>
@@ -73,13 +73,13 @@ export default function LinkRowActions({
       <input
         value={url}
         onChange={(e) => setUrl(e.target.value)}
-        className="w-48 rounded border px-2 py-1 text-xs"
+        className="qr-input w-48 text-xs"
       />
       <input
         type="datetime-local"
         value={expiresAt}
         onChange={(e) => setExpiresAt(e.target.value)}
-        className="w-48 rounded border px-2 py-1 text-xs"
+        className="qr-input w-48 text-xs"
       />
       <input
         type="password"
@@ -89,13 +89,13 @@ export default function LinkRowActions({
           setPwTouched(true);
         }}
         placeholder="Password baru (kosongkan = lepas)"
-        className="w-48 rounded border px-2 py-1 text-xs"
+        className="qr-input w-48 text-xs"
       />
       <div className="flex gap-1">
-        <button onClick={save} className="rounded bg-black px-2 py-1 text-xs text-white">
+        <button onClick={save} className="qr-btn px-2 py-1 text-xs">
           Simpan
         </button>
-        <button onClick={() => setEditing(false)} className="rounded border px-2 py-1 text-xs">
+        <button onClick={() => setEditing(false)} className="qr-btn-ghost px-2 py-1 text-xs">
           Batal
         </button>
       </div>

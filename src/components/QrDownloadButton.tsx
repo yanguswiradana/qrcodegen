@@ -25,7 +25,7 @@ export default function QrDownloadButton({ slug }: { slug: string }) {
     <button
       onClick={download}
       disabled={loading}
-      className="rounded border px-2 py-1 text-xs disabled:opacity-50"
+      className="qr-btn-ghost px-2 py-1 text-xs disabled:opacity-50"
     >
       {loading ? "..." : "QR PNG"}
     </button>

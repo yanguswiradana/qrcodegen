@@ -10,7 +10,7 @@ export default async function ScansPanel() {
 
   const rows = data ?? [];
   if (rows.length === 0) {
-    return <p className="mt-4 text-sm text-zinc-500">Belum ada scan.</p>;
+    return <p className="mt-4 text-sm text-zinc-400">Belum ada scan.</p>;
   }
 
   const byDevice: Record<string, number> = {};
@@ -18,26 +18,26 @@ export default async function ScansPanel() {
 
   return (
     <div className="mt-4">
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm text-zinc-400">
         30 scan terakhir — {Object.entries(byDevice).map(([k, v]) => `${k}: ${v}`).join(" · ")}
       </p>
-      <div className="mt-2 overflow-x-auto rounded border">
-        <table className="w-full text-sm">
+      <div className="mt-2 overflow-x-auto qr-card">
+        <table className="w-full text-sm qr-table">
           <thead>
-            <tr className="bg-zinc-50 text-left">
-              <th className="p-2">Slug</th>
-              <th className="p-2">Device</th>
-              <th className="p-2">Waktu</th>
+            <tr className="text-left">
+              <th>Slug</th>
+              <th>Device</th>
+              <th>Waktu</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r, i) => (
-              <tr key={i} className="border-t">
-                <td className="p-2 font-mono">
+              <tr key={i}>
+                <td className="font-mono">
                   {(r.links as unknown as { slug: string } | null)?.slug ?? "-"}
                 </td>
-                <td className="p-2">{r.device ?? "-"}</td>
-                <td className="max-w-48 truncate p-2 text-xs">
+                <td>{r.device ?? "-"}</td>
+                <td className="max-w-48 truncate text-xs">
                   {new Date(r.created_at).toLocaleString("id-ID")}
                 </td>
               </tr>

@@ -51,7 +51,7 @@ export default function ApiKeys() {
           setOpen(true);
           load();
         }}
-        className="rounded border px-3 py-1.5 text-sm"
+        className="qr-btn-ghost text-sm"
       >
         API keys
       </button>
@@ -59,14 +59,14 @@ export default function ApiKeys() {
   }
 
   return (
-    <div className="rounded border p-4">
+    <div className="qr-card p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold">API keys</h2>
-        <button onClick={() => setOpen(false)} className="text-sm text-zinc-500">
+        <h2 className="text-lg font-semibold">API keys</h2>
+        <button onClick={() => setOpen(false)} className="text-sm text-zinc-400">
           Tutup
         </button>
       </div>
-      <p className="mt-1 text-xs text-zinc-500">
+      <p className="mt-1 text-xs text-zinc-400">
         Header: Authorization: Bearer qrgen_... — contoh: POST /api/links
         dengan {"{target_url}"}.
       </p>
@@ -75,14 +75,14 @@ export default function ApiKeys() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nama key"
-          className="rounded border px-2 py-1 text-sm"
+          className="qr-input text-sm"
         />
-        <button onClick={create} className="rounded bg-black px-3 py-1 text-sm text-white">
+        <button onClick={create} className="qr-btn text-sm">
           Buat
         </button>
       </div>
       {fresh && (
-        <p className="mt-2 break-all rounded bg-amber-50 p-2 font-mono text-xs">
+        <p className="mt-2 break-all rounded border border-[var(--line)] bg-black/40 p-2 font-mono text-xs">
           {fresh} — salin sekarang, tidak tampil lagi.
         </p>
       )}
