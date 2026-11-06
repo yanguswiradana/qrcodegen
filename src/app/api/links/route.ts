@@ -12,10 +12,21 @@ async function sha256(s: string) {
 
 export async function POST(request: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Login dulu" }, { status: 401 });
+  let userId: string | null = null;
+
+  // Auth: Bearer API key ATAU sesi login.
+  const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (bearer) {
+    const { data: uid } = await supabase.rpc("auth_api_key", { p_key: bearer });
+    userId = (uid as string) ?? null;
+    if (!userId) return NextResponse.json({ error: "API key salah" }, { status: 401 });
+  } else {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Login dulu" }, { status: 401 });
+    userId = user.id;
+  }
 
   const body = await request.json().catch(() => null);
   const targetUrl = body?.target_url?.trim();
@@ -46,7 +57,7 @@ export async function POST(request: Request) {
 
   // Rate limit: 20 create/jam per user.
   const { data: allowed } = await supabase.rpc("check_rate", {
-    p_key: `create:${user.id}`,
+    p_key: `create:${userId}`,
     p_limit: 20,
     p_window_secs: 3600,
   });
@@ -85,7 +96,7 @@ export async function POST(request: Request) {
         password_hash: password
           ? await sha256(password)
           : null,
-        created_by: user!.id,
+        created_by: userId!,
       })
       .select("id, slug")
       .single();
@@ -95,7 +106,7 @@ export async function POST(request: Request) {
       link_id: data.id,
       payload: data.slug,
       name,
-      created_by: user!.id,
+      created_by: userId!,
     });
     return { slug: data.slug };
   }
@@ -194,17 +205,27 @@ export async function DELETE(request: Request) {
   return NextResponse.json({ ok: true });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Login dulu" }, { status: 401 });
+  let userId: string | null = null;
+
+  const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (bearer) {
+    const { data: uid } = await supabase.rpc("auth_api_key", { p_key: bearer });
+    userId = (uid as string) ?? null;
+    if (!userId) return NextResponse.json({ error: "API key salah" }, { status: 401 });
+  } else {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Login dulu" }, { status: 401 });
+    userId = user.id;
+  }
 
   const { data } = await supabase
     .from("links")
     .select("slug, target_url, clicks, expires_at, created_at")
-    .eq("created_by", user.id)
+    .eq("created_by", userId)
     .order("created_at", { ascending: false })
     .limit(50);
   return NextResponse.json({ links: data ?? [] });

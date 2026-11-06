@@ -6,6 +6,7 @@ import BulkCreate from "@/components/BulkCreate";
 import LinksList from "@/components/LinksList";
 import ScansPanel from "@/components/ScansPanel";
 import ScansChart from "@/components/ScansChart";
+import ApiKeys from "@/components/ApiKeys";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -26,9 +27,12 @@ export default async function DashboardPage() {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <form action={logout}>
-          <button className="rounded border px-3 py-1.5 text-sm">Keluar</button>
-        </form>
+        <div className="flex gap-2">
+          <ApiKeys />
+          <form action={logout}>
+            <button className="rounded border px-3 py-1.5 text-sm">Keluar</button>
+          </form>
+        </div>
       </div>
       <p className="mt-1 text-sm text-zinc-600">{user.email}</p>
 
