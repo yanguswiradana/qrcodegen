@@ -9,6 +9,7 @@ export default function QrDynamicForm() {
   const [name, setName] = useState("");
   const [alias, setAlias] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
+  const [password, setPassword] = useState("");
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,7 @@ export default function QrDynamicForm() {
     const res = await fetch("/api/links", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ target_url: url, name, alias, expires_at: expiresAt }),
+      body: JSON.stringify({ target_url: url, name, alias, expires_at: expiresAt, password }),
     });
     const data = await res.json();
     setLoading(false);
@@ -29,6 +30,7 @@ export default function QrDynamicForm() {
     setResult(`${location.origin}/r/${data.slug}`);
     setAlias("");
     setExpiresAt("");
+    setPassword("");
     router.refresh();
   }
 
@@ -61,6 +63,13 @@ export default function QrDynamicForm() {
           type="datetime-local"
           value={expiresAt}
           onChange={(e) => setExpiresAt(e.target.value)}
+          className="rounded border px-3 py-2 text-sm"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password link (opsional)"
           className="rounded border px-3 py-2 text-sm"
         />
         <button disabled={loading} className="rounded bg-black py-2 text-white disabled:opacity-50">

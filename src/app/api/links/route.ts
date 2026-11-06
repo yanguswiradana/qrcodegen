@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { genSlug } from "@/lib/slug";
 
-const ALIAS_RE = /^[a-zA-Z0-9_-]{3,32}$/;
+import { createHash } from "node:crypto";
+
+async function sha256(s: string) {
+  return createHash("sha256").update(s).digest("hex");
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -16,6 +20,7 @@ export async function POST(request: Request) {
   const name = body?.name?.trim() || null;
   const alias = body?.alias?.trim() || null;
   const expiresAt = body?.expires_at?.trim() || null;
+  const password = body?.password?.trim() || null;
 
   try {
     new URL(targetUrl);
@@ -71,7 +76,15 @@ export async function POST(request: Request) {
   async function create(slug: string) {
     const { data, error } = await supabase
       .from("links")
-      .insert({ slug, target_url: targetUrl, expires_at, created_by: user!.id })
+      .insert({
+        slug,
+        target_url: targetUrl,
+        expires_at,
+        password_hash: password
+          ? await sha256(password)
+          : null,
+        created_by: user!.id,
+      })
       .select("id, slug")
       .single();
     if (error || !data) return { error };
@@ -136,6 +149,10 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: "Expiry tidak valid" }, { status: 400 });
       patch.expires_at = d.toISOString();
     }
+  }
+  if (body.password !== undefined) {
+    const pw = String(body.password ?? "").trim();
+    patch.password_hash = pw ? await sha256(pw) : null;
   }
   if (Object.keys(patch).length === 0)
     return NextResponse.json({ error: "Tidak ada perubahan" }, { status: 400 });

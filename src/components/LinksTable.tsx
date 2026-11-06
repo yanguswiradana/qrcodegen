@@ -8,6 +8,7 @@ export type LinkRow = {
   target_url: string;
   clicks: number | null;
   expires_at: string | null;
+  has_password?: boolean;
 };
 
 export default function LinksTable({ links }: { links: LinkRow[] }) {
@@ -35,6 +36,7 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
                 <a href={`/r/${l.slug}`} target="_blank" className="underline">
                   /r/{l.slug}
                 </a>{" "}
+                {l.has_password && <span title="Berpassword">🔒</span>}{" "}
                 <a
                   href={`/s/${l.slug}`}
                   target="_blank"

@@ -14,6 +14,8 @@ export default function LinkRowActions({
   const [editing, setEditing] = useState(false);
   const [url, setUrl] = useState(targetUrl);
   const [expiresAt, setExpiresAt] = useState("");
+  const [password, setPassword] = useState("");
+  const [pwTouched, setPwTouched] = useState(false);
   const [msg, setMsg] = useState("");
 
   async function save() {
@@ -25,6 +27,7 @@ export default function LinkRowActions({
         slug,
         target_url: url,
         expires_at: expiresAt || null,
+        ...(pwTouched ? { password: password || null } : {}),
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -76,6 +79,16 @@ export default function LinkRowActions({
         type="datetime-local"
         value={expiresAt}
         onChange={(e) => setExpiresAt(e.target.value)}
+        className="w-48 rounded border px-2 py-1 text-xs"
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => {
+          setPassword(e.target.value);
+          setPwTouched(true);
+        }}
+        placeholder="Password baru (kosongkan = lepas)"
         className="w-48 rounded border px-2 py-1 text-xs"
       />
       <div className="flex gap-1">
