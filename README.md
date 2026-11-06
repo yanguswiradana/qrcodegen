@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# QRGen — QR Code + Short Link (self-hostable)
 
-## Getting Started
+QR generator + short link satu dashboard. Static QR instan, dynamic QR via redirect `/r/:slug` dengan tracking scan. Stack: Next.js 16 + Supabase (Postgres + Auth).
 
-First, run the development server:
+Live demo (portfolio): tambahkan URL Vercel Sir di sini.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Fitur
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Static QR: URL/teks/WiFi/vCard, warna, logo tengah, ECC L/M/Q/H, export PNG/SVG
+- Dynamic QR + short link: alias custom, expiry, edit target, hapus
+- Redirect `/r/:slug` + counter klik + log scan (device, UA, IP)
+- Dashboard: list link, grafik scan 7 hari, 30 scan terakhir
+- Keamanan: rate limit 20 create/jam/user, blocklist domain
+- Auth: email + password (Supabase)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Self-host (5 menit)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Clone + install:
+   ```bash
+   git clone https://github.com/yanguswiradana/qrcodegen
+   cd qrcodegen
+   npm install
+   ```
+2. Buat project di [Supabase](https://supabase.com) (free tier cukup).
+3. Copy env:
+   ```bash
+   cp .env.example .env.local
+   ```
+   Isi `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   (Settings → API; anon = publishable key). Opsional: `NEXT_PUBLIC_SHORT_DOMAIN`.
+4. Migrasi DB (butuh [Supabase CLI](https://supabase.com/docs/guides/cli)):
+   ```bash
+   npx supabase link --project-ref <REF>
+   npx supabase db push --remote --yes --include-all
+   ```
+   Alternatif tanpa CLI: jalankan `supabase/schema.sql` + file di
+   `supabase/migrations/` satu-satu di SQL Editor.
+5. Supabase Auth: pastikan provider **Email** ON. Confirm email OFF untuk dev, ON untuk prod.
+6. Jalankan:
+   ```bash
+   npm run dev -- -p 3002
+   ```
+   Buka `http://localhost:3002`, daftar akun, pakai.
 
-## Learn More
+## Deploy (Vercel)
 
-To learn more about Next.js, take a look at the following resources:
+Import repo → set env yang sama → deploy. Tambahkan domain prod ke
+Supabase Auth → URL Configuration (Site URL + Redirect `/auth/callback`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Struktur
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `src/app/(landing, login, dashboard, r/[slug], api/links)` — rute + API
+- `src/components/` — form QR, tabel link, grafik, panel scan
+- `src/lib/` — client Supabase, generator QR, slug, short domain
+- `supabase/migrations/` — migrasi berurutan (CLI)
 
-## Deploy on Vercel
+## Lisensi
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT — bebas pakai, modif, hosting sendiri. Lihat `LICENSE`.
