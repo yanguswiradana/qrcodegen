@@ -17,7 +17,10 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ email });
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${location.origin}/auth/callback` },
+    });
     setLoading(false);
     if (error) return setError(error.message);
     setStep("otp");
@@ -42,7 +45,7 @@ export default function LoginPage() {
     <main className="mx-auto max-w-sm px-6 py-20">
       <h1 className="text-2xl font-bold">Masuk</h1>
       <p className="mt-1 text-sm text-zinc-600">
-        Kode 6 digit dikirim ke email.
+        Kode 6 digit dikirim ke email — atau klik tombol link di email.
       </p>
 
       {step === "email" ? (
