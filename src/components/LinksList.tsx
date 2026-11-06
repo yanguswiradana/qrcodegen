@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import QrDownloadButton from "@/components/QrDownloadButton";
 
 export default async function LinksList() {
   const supabase = await createClient();
@@ -21,6 +22,7 @@ export default async function LinksList() {
             <th className="p-2">Slug</th>
             <th className="p-2">Tujuan</th>
             <th className="p-2">Klik</th>
+            <th className="p-2">QR</th>
           </tr>
         </thead>
         <tbody>
@@ -33,6 +35,9 @@ export default async function LinksList() {
               </td>
               <td className="max-w-64 truncate p-2">{l.target_url}</td>
               <td className="p-2">{l.clicks}</td>
+              <td className="p-2">
+                <QrDownloadButton slug={l.slug} />
+              </td>
             </tr>
           ))}
         </tbody>
