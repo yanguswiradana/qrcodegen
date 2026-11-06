@@ -77,8 +77,8 @@ export default function QrStaticForm({
   const [color, setColor] = useState("#000000");
   const [bg, setBg] = useState("#ffffff");
   const [ecc, setEcc] = useState<"L" | "M" | "Q" | "H">("M");
-  const [frame, setFrame] = useState(true);
-  const [caption, setCaption] = useState("SCAN ME");
+  const [frame, setFrame] = useState(false);
+  const [caption, setCaption] = useState("");
   const [size, setSize] = useState(512);
   const [png, setPng] = useState("");
   const [svg, setSvg] = useState("");
@@ -189,7 +189,11 @@ export default function QrStaticForm({
               type="button"
               onClick={() => setEcc(e)}
               title={`Koreksi error ${e}`}
-              className={e === ecc ? "qr-btn" : "qr-btn-ghost"}
+              disabled={!text.trim() || disabled}
+              className={
+                (e === ecc ? "qr-btn" : "qr-btn-ghost") +
+                " disabled:opacity-40"
+              }
             >
               {e}
             </button>
