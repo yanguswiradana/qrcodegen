@@ -12,14 +12,29 @@ function drawLogo(img: HTMLImageElement, png: string): Promise<string> {
       c.height = qr.height;
       const ctx = c.getContext("2d")!;
       ctx.drawImage(qr, 0, 0);
-      // Logo box: putus agar QR tetap terbaca (ECC M+ disarankan).
-      const box = qr.width * 0.26;
+      // Kotak putih (quiet zone) di tengah agar logo tidak menempel modul.
+      // Ukuran ~24% sisi QR: aman untuk ECC H (recovery ±30%).
+      const box = qr.width * 0.24;
       const x = (qr.width - box) / 2;
       const y = (qr.height - box) / 2;
       ctx.fillStyle = "#ffffff";
-      ctx.fillRect(x, y, box, box);
-      const pad = box * 0.12;
-      ctx.drawImage(img, x + pad, y + pad, box - pad * 2, box - pad * 2);
+      ctx.beginPath();
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(x, y, box, box, box * 0.18);
+      } else {
+        ctx.rect(x, y, box, box);
+      }
+      ctx.fill();
+      // Logo di-fit proporsional (contain), tidak dipaksa persegi.
+      const pad = box * 0.14;
+      const iw = Math.max(1, box - pad * 2);
+      const ih = Math.max(1, box - pad * 2);
+      const nw = img.naturalWidth || img.width || 1;
+      const nh = img.naturalHeight || img.height || 1;
+      const scale = Math.min(iw / nw, ih / nh);
+      const w = nw * scale;
+      const h = nh * scale;
+      ctx.drawImage(img, x + (box - w) / 2, y + (box - h) / 2, w, h);
       resolve(c.toDataURL("image/png"));
     };
     qr.src = png;
@@ -96,7 +111,11 @@ export default function QrStaticForm({
     const f = e.target.files?.[0];
     if (!f) return setLogoPreview("");
     const reader = new FileReader();
-    reader.onload = () => setLogoPreview(String(reader.result));
+    reader.onload = () => {
+      setLogoPreview(String(reader.result));
+      // Logo menutup ±6% area tengah: wajib ECC H agar tetap terbaca.
+      setEcc("H");
+    };
     reader.readAsDataURL(f);
   }
 
@@ -183,9 +202,14 @@ export default function QrStaticForm({
             Buat
           </button>
         </div>
-        {logoPreview && (
-          <p className="text-xs text-amber-700">
-            Logo aktif — pakai ECC M/Q/H agar tetap terbaca.
+        {logoPreview && ecc === "H" && (
+          <p className="text-xs text-lime-300">
+            Logo aktif + ECC H — siap scan.
+          </p>
+        )}
+        {logoPreview && ecc !== "H" && (
+          <p className="text-xs text-amber-600">
+            Logo + ECC {ecc} berisiko gagal scan — disarankan H.
           </p>
         )}
       </div>
