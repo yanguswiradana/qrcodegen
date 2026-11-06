@@ -67,6 +67,14 @@ Urutan migrasi remote saat ini:
    `verify_link_password` (perlu `pgcrypto` untuk `digest`).
 5. `20261106132748_api_keys` — tabel `api_keys` + RPC `auth_api_key`.
 6. `20261106162946_expiry_resolve_link` — kolom `expires_at` + RPC `resolve_link`.
+7. `20261106164620_public_link_redirect` — RPC `get_link_public` (target,
+   expires, has_password; TANPA password_hash). Wajib dipakai `/r/[slug]`
+   karena RLS links hanya "own links" → select anon langsung selalu kosong
+   (sempat bikin SEMUA short link publik mental ke "/").
+8. `20261106164829_fix_digest_search_path` — `verify_link_password` +
+   `auth_api_key` diganti `set search_path = public, extensions`. pgcrypto di
+   Supabase terinstal di skema `extensions`; search_path lama (= public saja)
+   bikin `digest()` 42883 → link password tak pernah terbuka + API key mati.
 
 File `supabase/schema.sql` + `supabase/migration_002.sql` adalah arsip awal,
 BUKAN sumber migrasi (jangan push ulang — policy duplikat).
@@ -86,7 +94,10 @@ BUKAN sumber migrasi (jangan push ulang — policy duplikat).
 - **`next.config.ts`**: `cacheComponents: true` bentrok dengan route config Next 16
   → sudah dimatikan, jangan nyalakan lagi.
 - **PostgREST schema cache**: RPC baru kadang 404 `PGRST202` sebentar setelah
-  push — tunggu ±1 menit lalu retry, bukan bug kode.
+  push — tunggu ±1 menit lalu retry, bukan bug kode. Bedakan dengan 404
+  `42883` + `digest() does not exist` = search_path salah (nyata, bukan cache).
+- **Anon tidak bisa SELECT links**: RLS "own links" → halaman publik (`/r/`)
+  WAJIB lewat RPC definer kolom-minimal, jangan select langsung.
 - **Port**: dev WAJIB `-p 3002`. Proses stale → EADDRINUSE; kill via
   `taskkill //F //PID`.
 

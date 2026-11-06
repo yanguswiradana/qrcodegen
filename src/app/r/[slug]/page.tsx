@@ -37,17 +37,21 @@ export default async function RedirectPage({
     h.get("x-real-ip");
 
   const supabase = await createClient();
-  const { data: link } = await supabase
-    .from("links")
-    .select("target_url, expires_at, password_hash")
-    .eq("slug", slug)
-    .maybeSingle();
+
+  // Baca via RPC definer: RLS links hanya "own links" sehingga select anon
+  // langsung selalu kosong. RPC hanya exposing kolom minimal (tanpa hash).
+  const { data } = await supabase.rpc("get_link_public", { p_slug: slug });
+  const link = (Array.isArray(data) ? data[0] : data) as {
+    target_url: string;
+    expires_at: string | null;
+    has_password: boolean;
+  } | null;
 
   if (!link) redirect("/");
   if (link.expires_at && new Date(link.expires_at) <= new Date()) redirect("/");
 
   // Link berpassword: minta pw via query (?pw=) atau tampilkan gate.
-  if (link.password_hash) {
+  if (link.has_password) {
     if (!pw) return <PasswordGate slug={slug} />;
     const { data: ok } = await supabase.rpc("verify_link_password", {
       p_slug: slug,
