@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FreeQrGate from "@/components/FreeQrGate";
 
 export default function Home() {
   return (
@@ -16,6 +17,9 @@ export default function Home() {
           Dashboard
         </Link>
       </div>
+
+      <FreeQrGate />
+
       <ul className="mt-12 list-disc pl-6 text-zinc-700">
         <li>Static: URL, teks, WiFi, vCard → PNG/SVG</li>
         <li>Dynamic: /r/slug, edit target, hitung scan</li>

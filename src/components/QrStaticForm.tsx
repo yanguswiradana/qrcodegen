@@ -26,7 +26,13 @@ function drawLogo(img: HTMLImageElement, png: string): Promise<string> {
   });
 }
 
-export default function QrStaticForm() {
+export default function QrStaticForm({
+  onGenerated,
+  disabled = false,
+}: {
+  onGenerated?: () => void;
+  disabled?: boolean;
+} = {}) {
   const [text, setText] = useState("https://");
   const [color, setColor] = useState("#000000");
   const [bg, setBg] = useState("#ffffff");
@@ -35,16 +41,20 @@ export default function QrStaticForm() {
   const [logoPreview, setLogoPreview] = useState("");
 
   async function gen(ecc: "L" | "M" | "Q" | "H" = "M") {
-    if (!text.trim()) return;
+    if (!text.trim() || disabled) return;
     const style = { color, bg, ecc };
     let out = await toPngDataUrl(text, style);
     setSvg(await toSvg(text, style));
     if (logoPreview) {
       const logo = new Image();
-      logo.onload = async () => setPng(await drawLogo(logo, out));
+      logo.onload = async () => {
+        setPng(await drawLogo(logo, out));
+        onGenerated?.();
+      };
       logo.src = logoPreview;
     } else {
       setPng(out);
+      onGenerated?.();
     }
   }
 
