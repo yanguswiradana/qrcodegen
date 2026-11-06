@@ -34,6 +34,14 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
               <td className="p-2 font-mono">
                 <a href={`/r/${l.slug}`} target="_blank" className="underline">
                   /r/{l.slug}
+                </a>{" "}
+                <a
+                  href={`/s/${l.slug}`}
+                  target="_blank"
+                  className="text-xs text-zinc-500"
+                  title="Statistik publik"
+                >
+                  stats
                 </a>
               </td>
               <td className="max-w-64 truncate p-2">{l.target_url}</td>
