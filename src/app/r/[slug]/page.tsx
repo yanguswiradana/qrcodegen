@@ -1,7 +1,8 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import PasswordGate from "@/components/PasswordGate";
+import LinkExpired from "@/components/LinkExpired";
 
 function deviceOf(ua: string) {
   const u = ua.toLowerCase();
@@ -47,8 +48,9 @@ export default async function RedirectPage({
     has_password: boolean;
   } | null;
 
-  if (!link) redirect("/");
-  if (link.expires_at && new Date(link.expires_at) <= new Date()) redirect("/");
+  if (!link) notFound();
+  if (link.expires_at && new Date(link.expires_at) <= new Date())
+    return <LinkExpired slug={slug} expiredAt={link.expires_at} />;
 
   // Link berpassword: minta pw via query (?pw=) atau tampilkan gate.
   if (link.has_password) {
