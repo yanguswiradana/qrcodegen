@@ -16,10 +16,12 @@ export async function POST(request: Request) {
 
   // Auth: Bearer API key ATAU sesi login.
   const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  let apiKey: string | null = null;
   if (bearer) {
     const { data: uid } = await supabase.rpc("auth_api_key", { p_key: bearer });
     userId = (uid as string) ?? null;
     if (!userId) return NextResponse.json({ error: "API key salah" }, { status: 401 });
+    apiKey = bearer;
   } else {
     const {
       data: { user },
@@ -34,6 +36,37 @@ export async function POST(request: Request) {
   const alias = body?.alias?.trim() || null;
   const expiresAt = body?.expires_at?.trim() || null;
   const password = body?.password?.trim() || null;
+
+  // Jalur API key: seluruh create lewat RPC definer karena anon tanpa JWT
+  // ditolak RLS (INSERT links). Validasi + rate limit ada di dalam RPC.
+  if (apiKey) {
+    if (expiresAt && isNaN(new Date(expiresAt).getTime())) {
+      return NextResponse.json({ error: "Expiry tidak valid" }, { status: 400 });
+    }
+    const { data } = await supabase.rpc("api_create_link", {
+      p_key: apiKey,
+      p_target_url: body?.target_url ?? null,
+      p_alias: alias,
+      p_expires_at: expiresAt,
+      p_password: password,
+      p_name: name,
+    });
+    const r = (data ?? {}) as { ok?: boolean; slug?: string; code?: string };
+    if (!r.ok) {
+      const map: Record<string, [string, number]> = {
+        bad_key: ["API key salah", 401],
+        invalid_url: ["URL tidak valid", 400],
+        blocked: ["Domain diblokir", 403],
+        rate_limited: ["Batas 20 link/jam, coba lagi nanti", 429],
+        alias_invalid: ["Alias 3-32 char: huruf, angka, - _ saja", 400],
+        alias_taken: ["Alias sudah dipakai", 409],
+        expiry_invalid: ["Expiry harus tanggal masa depan", 400],
+      };
+      const [error, status] = map[r.code ?? ""] ?? ["Gagal", 500];
+      return NextResponse.json({ error }, { status });
+    }
+    return NextResponse.json({ slug: r.slug });
+  }
 
   try {
     new URL(targetUrl);
@@ -56,11 +89,19 @@ export async function POST(request: Request) {
   }
 
   // Rate limit: 20 create/jam per user.
-  const { data: allowed } = await supabase.rpc("check_rate", {
-    p_key: `create:${userId}`,
-    p_limit: 20,
-    p_window_secs: 3600,
-  });
+  // Jalur API key memakai check_rate_key (key diverifikasi di dalam RPC,
+  // bucket dibangun dari uid hasil verifikasi sehingga tak bisa dipalsukan).
+  const { data: allowed } = apiKey
+    ? await supabase.rpc("check_rate_key", {
+        p_key: apiKey,
+        p_limit: 20,
+        p_window_secs: 3600,
+      })
+    : await supabase.rpc("check_rate", {
+        p_key: `create:${userId}`,
+        p_limit: 20,
+        p_window_secs: 3600,
+      });
   if (allowed === false)
     return NextResponse.json(
       { error: "Batas 20 link/jam, coba lagi nanti" },
@@ -211,9 +252,16 @@ export async function GET(request: Request) {
 
   const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (bearer) {
-    const { data: uid } = await supabase.rpc("auth_api_key", { p_key: bearer });
-    userId = (uid as string) ?? null;
-    if (!userId) return NextResponse.json({ error: "API key salah" }, { status: 401 });
+    // Jalur API key lewat RPC definer (anon tanpa JWT dibatasi RLS).
+    const { data } = await supabase.rpc("api_list_links", { p_key: bearer });
+    const rows = (data ?? []) as unknown[];
+    if (rows.length === 0) {
+      const { data: uid } = await supabase.rpc("auth_api_key", { p_key: bearer });
+      if (!(uid as string)) {
+        return NextResponse.json({ error: "API key salah" }, { status: 401 });
+      }
+    }
+    return NextResponse.json({ links: rows });
   } else {
     const {
       data: { user },

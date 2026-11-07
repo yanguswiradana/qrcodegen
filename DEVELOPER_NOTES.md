@@ -98,6 +98,10 @@ BUKAN sumber migrasi (jangan push ulang — policy duplikat).
   `42883` + `digest() does not exist` = search_path salah (nyata, bukan cache).
 - **Anon tidak bisa SELECT links**: RLS "own links" → halaman publik (`/r/`)
   WAJIB lewat RPC definer kolom-minimal, jangan select langsung.
+- **Mode Bearer (API key) tanpa JWT selalu gagal RLS** — INSERT/SELECT
+  langsung via anon client ditolak. Pola baku: RPC definer yang verifikasi
+  key via digest di DALAM fungsi (`api_create_link`, `api_list_links`,
+  `check_rate_key`). Jangan pernah oper `created_by` dari client.
 - **Port**: dev WAJIB `-p 3002`. Proses stale → EADDRINUSE; kill via
   `taskkill //F //PID`.
 
