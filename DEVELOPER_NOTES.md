@@ -22,7 +22,7 @@ URL `https://nmshwrptczkuxhwpoyky.supabase.co`, project ref `nmshwrptczkuxhwpoyk
   (disembunyikan sengaja, keputusan owner). Akses admin via `/login` manual.
 - `src/app/login/page.tsx` — auth email+password (Supabase). Confirm email OFF.
 - `src/app/dashboard/page.tsx` — server component, proteksi `getUser()` +
-  middleware (`src/middleware.ts` redirect `/dashboard` → `/login` bila anonim).
+  proxy (`src/proxy.ts` redirect `/dashboard` → `/login` bila anonim).
 - `src/app/api/links/route.ts` — POST (alias custom, expiry, password SHA-256,
   rate limit `check_rate` 20/jam/user, blocklist `blocked_hosts`), PATCH, DELETE,
   GET. Auth ganda: sesi login ATAU `Authorization: Bearer qrgen_...`
