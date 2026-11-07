@@ -59,7 +59,13 @@ export default async function RedirectPage({
       p_slug: slug,
       p_password: pw,
     });
-    if (ok !== true) return <PasswordGate slug={slug} error="Password salah" />;
+    if (ok !== true)
+      return (
+        <PasswordGate
+          slug={slug}
+          error="Password salah atau terlalu banyak percobaan, coba lagi nanti."
+        />
+      );
   }
 
   await track(slug, ua, ip ?? undefined);
