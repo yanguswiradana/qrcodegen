@@ -208,6 +208,35 @@ export async function PATCH(request: Request) {
     const pw = String(body.password ?? "").trim();
     patch.password_hash = pw ? await sha256(pw) : null;
   }
+  // Rename alias: validasi format, milik sendiri, dan tidak bentrok.
+  let linkId: string | null = null;
+  if (body.new_slug !== undefined) {
+    const ns = String(body.new_slug ?? "").trim();
+    if (ns && ns !== slug) {
+      if (!ALIAS_RE.test(ns)) {
+        return NextResponse.json(
+          { error: "Alias 3-32 char: huruf, angka, - _ saja" },
+          { status: 400 }
+        );
+      }
+      const { data: own } = await supabase
+        .from("links")
+        .select("id")
+        .eq("slug", slug)
+        .eq("created_by", user.id)
+        .maybeSingle();
+      if (!own) return NextResponse.json({ error: "Tidak ketemu" }, { status: 404 });
+      const { data: clash } = await supabase
+        .from("links")
+        .select("id")
+        .eq("slug", ns)
+        .maybeSingle();
+      if (clash)
+        return NextResponse.json({ error: "Alias sudah dipakai" }, { status: 409 });
+      patch.slug = ns;
+      linkId = (own as { id: string }).id;
+    }
+  }
   if (Object.keys(patch).length === 0)
     return NextResponse.json({ error: "Tidak ada perubahan" }, { status: 400 });
 
@@ -217,6 +246,13 @@ export async function PATCH(request: Request) {
     .eq("slug", slug)
     .eq("created_by", user.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  // Payload QR dynamic ikut alias baru.
+  if (patch.slug && linkId) {
+    await supabase
+      .from("qr_codes")
+      .update({ payload: patch.slug })
+      .eq("link_id", linkId);
+  }
   return NextResponse.json({ ok: true });
 }
 

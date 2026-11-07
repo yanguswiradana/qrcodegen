@@ -5,6 +5,11 @@
 > Aturan eksekusi: 1 tiket = 1 branch/commit, mandiri, selesai bila semua
 > "Kriteria selesai" terpenuhi + `tsc` 0 + `eslint` 0 + `build` sukses.
 > Urutan = prioritas. Estimasi: S (<1 jam), M (1–3 jam), L (>3 jam).
+>
+> Keputusan owner 2026-11-07 (diterapkan): A=10x salah/jam per slug, pesan
+> netral; B=validasi prefix+ownership + RPC khusus API key; E=boleh rename
+> dengan konfirmasi + warning QR lama mati; J=tabel sekarang cukup (<500
+> link), T-06 ditunda sampai skala menuntut.
 
 ## P0 — Wajib duluan (rusak / basi cepat)
 

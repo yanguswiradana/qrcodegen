@@ -16,11 +16,22 @@ export default function LinkRowActions({
   const [expiresAt, setExpiresAt] = useState("");
   const [password, setPassword] = useState("");
   const [pwTouched, setPwTouched] = useState(false);
+  const [newSlug, setNewSlug] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState<"save" | "del" | null>(null);
 
   async function save() {
     if (busy) return;
+    const ns = newSlug.trim();
+    const renaming = ns !== "" && ns !== slug;
+    if (renaming) {
+      if (
+        !confirm(
+          `Ganti alias /r/${slug} jadi /r/${ns}? QR cetak lama ikut mati.`
+        )
+      )
+        return;
+    }
     setMsg("");
     setBusy("save");
     try {
@@ -32,11 +43,13 @@ export default function LinkRowActions({
           target_url: url,
           expires_at: expiresAt || null,
           ...(pwTouched ? { password: password || null } : {}),
+          ...(renaming ? { new_slug: ns } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) return setMsg(data.error ?? "Gagal");
       setEditing(false);
+      setNewSlug("");
       router.refresh();
     } finally {
       setBusy(null);
@@ -65,6 +78,7 @@ export default function LinkRowActions({
         <button
           onClick={() => {
             setUrl(targetUrl);
+            setNewSlug("");
             setEditing(true);
           }}
           className="qr-btn-ghost px-2 py-1 text-xs"
@@ -94,6 +108,12 @@ export default function LinkRowActions({
         value={expiresAt}
         onChange={(e) => setExpiresAt(e.target.value)}
         className="qr-input w-48 text-xs"
+      />
+      <input
+        value={newSlug}
+        onChange={(e) => setNewSlug(e.target.value)}
+        placeholder="Alias baru (opsional)"
+        className="qr-input w-48 font-mono text-xs"
       />
       <input
         type="password"
