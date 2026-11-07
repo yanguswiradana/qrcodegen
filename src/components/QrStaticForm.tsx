@@ -41,6 +41,14 @@ function drawLogo(img: HTMLImageElement, png: string): Promise<string> {
   });
 }
 
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("logo"));
+    img.src = src;
+  });
+}
 function withFrame(png: string, caption: string, size: number): Promise<string> {
   return new Promise((resolve) => {
     const qr = new Image();
@@ -83,27 +91,39 @@ export default function QrStaticForm({
   const [png, setPng] = useState("");
   const [svg, setSvg] = useState("");
   const [logoPreview, setLogoPreview] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState("");
 
   // Hanya tombol "Buat" yang memicu generate + hitung kuota.
   // Pilihan ECC/warna/frame cuma ubah state, tidak generate ulang.
   async function gen() {
-    if (!text.trim() || disabled) return;
-    const style = { color, bg, ecc };
-    let out = await toPngDataUrl(text, { ...style, width: size });
-    setSvg(await toSvg(text, style));
-    if (logoPreview) {
-      const logo = new Image();
-      logo.onload = async () => {
+    if (!text.trim() || disabled || generating) return;
+    setGenerating(true);
+    setGenError("");
+    try {
+      const style = { color, bg, ecc };
+      let out = await toPngDataUrl(text, { ...style, width: size });
+      setSvg(await toSvg(text, style));
+      if (logoPreview) {
+        let logo: HTMLImageElement;
+        try {
+          logo = await loadImage(logoPreview);
+        } catch {
+          setGenError("Logo gagal dibaca, coba file lain.");
+          return;
+        }
         let done = await drawLogo(logo, out);
         if (frame) done = await withFrame(done, caption, size);
         setPng(done);
-        onGenerated?.();
-      };
-      logo.src = logoPreview;
-    } else {
-      if (frame) out = await withFrame(out, caption, size);
-      setPng(out);
+      } else {
+        if (frame) out = await withFrame(out, caption, size);
+        setPng(out);
+      }
       onGenerated?.();
+    } catch {
+      setGenError("Gagal membuat QR, coba lagi.");
+    } finally {
+      setGenerating(false);
     }
   }
 
@@ -200,19 +220,22 @@ export default function QrStaticForm({
           ))}
           <button
             onClick={() => gen()}
-            disabled={!text.trim() || disabled}
+            disabled={!text.trim() || disabled || generating}
             className="qr-btn disabled:opacity-50"
           >
-            Buat
+            {generating ? "Membuat…" : "Buat"}
           </button>
         </div>
+        {genError && (
+          <p className="text-xs text-red-400">{genError}</p>
+        )}
         {logoPreview && ecc === "H" && (
           <p className="text-xs text-lime-300">
             Logo aktif + ECC H — siap scan.
           </p>
         )}
         {logoPreview && ecc !== "H" && (
-          <p className="text-xs text-amber-600">
+          <p className="text-xs text-amber-400">
             Logo + ECC {ecc} berisiko gagal scan — disarankan H.
           </p>
         )}

@@ -12,6 +12,7 @@ export default function PasswordGate({
 }) {
   const router = useRouter();
   const [pw, setPw] = useState("");
+  const [show, setShow] = useState(false);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,7 +25,7 @@ export default function PasswordGate({
       <p className="mt-1 font-mono text-sm text-zinc-400">/r/{slug}</p>
       <form onSubmit={submit} className="mt-4 flex flex-col gap-2">
         <input
-          type="password"
+          type={show ? "text" : "password"}
           required
           value={pw}
           onChange={(e) => setPw(e.target.value)}
@@ -32,9 +33,18 @@ export default function PasswordGate({
           autoFocus
           className="qr-input"
         />
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setShow((s) => !s)}
+            className="text-xs text-zinc-400 underline underline-offset-4"
+          >
+            {show ? "Sembunyikan" : "Tampilkan"}
+          </button>
+        </div>
         <button className="qr-btn">Buka</button>
       </form>
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
     </main>
   );
 }

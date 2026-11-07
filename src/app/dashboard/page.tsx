@@ -36,24 +36,38 @@ export default async function DashboardPage() {
       </div>
       <p className="mt-1 text-sm text-zinc-400">{user.email}</p>
 
-      <div className="mt-6">
+      <nav className="mt-4 flex flex-wrap gap-2" aria-label="Navigasi dashboard">
+        {[
+          ["static", "Statis"],
+          ["dynamic", "Dinamis"],
+          ["bulk", "Bulk"],
+          ["links", "Short link"],
+          ["scans", "Scan"],
+        ].map(([id, label]) => (
+          <a key={id} href={`#${id}`} className="qr-btn-ghost px-3 py-1.5 text-xs">
+            {label}
+          </a>
+        ))}
+      </nav>
+
+      <div className="mt-6 scroll-mt-6" id="static">
         <QrStaticForm />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 scroll-mt-6" id="dynamic">
         <QrDynamicForm />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 scroll-mt-6" id="bulk">
         <BulkCreate />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 scroll-mt-6" id="links">
         <h2 className="text-lg font-semibold">Short link</h2>
         <LinksList />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 scroll-mt-6" id="scans">
         <h2 className="text-lg font-semibold">Scan terakhir</h2>
         <ScansChart />
         <ScansPanel />

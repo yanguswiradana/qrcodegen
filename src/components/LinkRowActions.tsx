@@ -17,33 +17,46 @@ export default function LinkRowActions({
   const [password, setPassword] = useState("");
   const [pwTouched, setPwTouched] = useState(false);
   const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState<"save" | "del" | null>(null);
 
   async function save() {
+    if (busy) return;
     setMsg("");
-    const res = await fetch("/api/links", {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        slug,
-        target_url: url,
-        expires_at: expiresAt || null,
-        ...(pwTouched ? { password: password || null } : {}),
-      }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) return setMsg(data.error ?? "Gagal");
-    setEditing(false);
-    router.refresh();
+    setBusy("save");
+    try {
+      const res = await fetch("/api/links", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          target_url: url,
+          expires_at: expiresAt || null,
+          ...(pwTouched ? { password: password || null } : {}),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return setMsg(data.error ?? "Gagal");
+      setEditing(false);
+      router.refresh();
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function remove() {
+    if (busy) return;
     if (!confirm(`Hapus /r/${slug}? QR cetak ikut mati.`)) return;
-    const res = await fetch(`/api/links?slug=${encodeURIComponent(slug)}`, {
-      method: "DELETE",
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) return setMsg(data.error ?? "Gagal");
-    router.refresh();
+    setBusy("del");
+    try {
+      const res = await fetch(`/api/links?slug=${encodeURIComponent(slug)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return setMsg(data.error ?? "Gagal");
+      router.refresh();
+    } finally {
+      setBusy(null);
+    }
   }
 
   if (!editing) {
@@ -60,9 +73,10 @@ export default function LinkRowActions({
         </button>
         <button
           onClick={remove}
-          className="qr-btn-ghost px-2 py-1 text-xs text-red-600"
+          disabled={busy !== null}
+          className="qr-btn-ghost px-2 py-1 text-xs text-red-400 disabled:opacity-50"
         >
-          Hapus
+          {busy === "del" ? "…" : "Hapus"}
         </button>
       </div>
     );
@@ -92,14 +106,22 @@ export default function LinkRowActions({
         className="qr-input w-48 text-xs"
       />
       <div className="flex gap-1">
-        <button onClick={save} className="qr-btn px-2 py-1 text-xs">
-          Simpan
+        <button
+          onClick={save}
+          disabled={busy !== null}
+          className="qr-btn px-2 py-1 text-xs disabled:opacity-50"
+        >
+          {busy === "save" ? "…" : "Simpan"}
         </button>
-        <button onClick={() => setEditing(false)} className="qr-btn-ghost px-2 py-1 text-xs">
+        <button
+          onClick={() => setEditing(false)}
+          disabled={busy !== null}
+          className="qr-btn-ghost px-2 py-1 text-xs disabled:opacity-50"
+        >
           Batal
         </button>
       </div>
-      {msg && <p className="text-xs text-red-600">{msg}</p>}
+      {msg && <p className="text-xs text-red-400">{msg}</p>}
     </div>
   );
 }

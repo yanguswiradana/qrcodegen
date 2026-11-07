@@ -44,6 +44,9 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * PER_PAGE;
   const pageRows = filtered.slice(start, start + PER_PAGE);
+  // Dibaca sekali per render — badge "lewat" stabil selama render ini.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
 
   const pageSlugs = pageRows.map((l) => l.slug);
   const allPageSelected =
@@ -118,7 +121,7 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
           <button
             onClick={bulkDelete}
             disabled={deleting}
-            className="qr-btn-ghost px-3 py-1.5 text-sm text-red-600 disabled:opacity-50"
+            className="qr-btn-ghost px-3 py-1.5 text-sm text-red-400 disabled:opacity-50"
           >
             {deleting
               ? "Menghapus…"
@@ -197,6 +200,12 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
                     {l.expires_at
                       ? new Date(l.expires_at).toLocaleDateString("id-ID")
                       : "-"}
+                    {l.expires_at &&
+                      new Date(l.expires_at).getTime() <= now && (
+                        <span className="ml-1 rounded border border-red-400/30 px-1 py-px text-[10px] text-red-400">
+                          lewat
+                        </span>
+                      )}
                   </td>
                   <td>
                     <QrDownloadButton slug={l.slug} />
@@ -242,11 +251,13 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
                 <button
                   key={n}
                   onClick={() => setPage(n)}
-                  className={`px-2 py-1 text-xs ${
+                  aria-current={n === safePage ? "page" : undefined}
+                  className="qr-btn-ghost px-2 py-1 text-xs"
+                  style={
                     n === safePage
-                      ? "qr-btn"
-                      : "qr-btn-ghost"
-                  }`}
+                      ? { borderColor: "var(--accent)", fontWeight: 700 }
+                      : undefined
+                  }
                 >
                   {n}
                 </button>

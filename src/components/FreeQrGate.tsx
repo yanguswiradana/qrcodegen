@@ -11,8 +11,12 @@ export default function FreeQrGate() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setUsed(Number(localStorage.getItem(KEY) ?? 0));
-    setReady(true);
+    // setState di dalam callback (bukan sinkron di body effect).
+    const id = setTimeout(() => {
+      setUsed(Number(localStorage.getItem(KEY) ?? 0) || 0);
+      setReady(true);
+    }, 0);
+    return () => clearTimeout(id);
   }, []);
 
   const left = Math.max(0, LIMIT - used);
@@ -24,7 +28,14 @@ export default function FreeQrGate() {
     localStorage.setItem(KEY, String(next));
   }
 
-  if (!ready) return null;
+  if (!ready) {
+    return (
+      <div className="mt-10" aria-hidden>
+        <div className="mb-3 h-5 w-56 animate-pulse rounded bg-white/5" />
+        <div className="qr-card h-72 animate-pulse p-5" />
+      </div>
+    );
+  }
 
   return (
     <div className="mt-10">
@@ -40,7 +51,8 @@ export default function FreeQrGate() {
         <div className="qr-card p-5 text-center">
           <p className="font-semibold">Kuota coba gratis habis</p>
           <p className="mt-1 text-sm text-zinc-400">
-            Refresh halaman untuk coba lagi, atau hubungi pemilik untuk akses penuh.
+            Kuota 3x di browser ini sudah terpakai. Buka jendela incognito
+            untuk coba lagi, atau hubungi pemilik untuk akses penuh.
           </p>
         </div>
       ) : (

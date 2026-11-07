@@ -86,7 +86,7 @@ export default function LoginPage() {
         </button>
       </form>
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
       {info && <p className="mt-4 text-sm text-green-400">{info}</p>}
     </main>
   );

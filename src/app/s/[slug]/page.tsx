@@ -24,8 +24,11 @@ export default async function StatsPage({
   if (!row) notFound();
 
   const days: { label: string; key: string; count: number }[] = [];
+  // Dibaca sekali per render request — stabil selama render ini.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 864e5);
+    const d = new Date(now - i * 864e5);
     const key = d.toISOString().slice(0, 10);
     days.push({
       key,

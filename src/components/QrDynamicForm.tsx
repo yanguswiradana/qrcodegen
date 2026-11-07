@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function QrDynamicForm() {
   const router = useRouter();
-  const [url, setUrl] = useState("https://");
+  const [url, setUrl] = useState("");
   const [name, setName] = useState("");
   const [alias, setAlias] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
@@ -13,11 +13,26 @@ export default function QrDynamicForm() {
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  function validTarget(u: string): boolean {
+    try {
+      const p = new URL(u.trim());
+      return p.protocol === "http:" || p.protocol === "https:";
+    } catch {
+      return false;
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setResult("");
+    setCopied(false);
+    if (!validTarget(url)) {
+      setError("URL tidak valid (butuh http(s)://).");
+      return;
+    }
     setLoading(true);
     const res = await fetch("/api/links", {
       method: "POST",
@@ -34,6 +49,16 @@ export default function QrDynamicForm() {
     router.refresh();
   }
 
+  async function copyResult() {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(result);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError("Gagal menyalin otomatis, salin manual.");
+    }
+  }
   return (
     <div className="qr-card p-5">
       <h2 className="font-semibold">Dynamic QR + short link</h2>
@@ -76,11 +101,20 @@ export default function QrDynamicForm() {
           {loading ? "Membuat..." : "Buat link + QR"}
         </button>
       </form>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
       {result && (
-        <p className="mt-2 text-sm">
-          Jadi: <a href={result} className="underline" target="_blank">{result}</a>
-        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+          <p>
+            Jadi: <a href={result} className="underline" target="_blank">{result}</a>
+          </p>
+          <button
+            type="button"
+            onClick={copyResult}
+            className="qr-btn-ghost px-2 py-1 text-xs"
+          >
+            {copied ? "Disalin!" : "Salin"}
+          </button>
+        </div>
       )}
     </div>
   );

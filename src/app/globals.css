@@ -8,6 +8,16 @@
   --line: #26262f;
   --accent: #bef264;
   --accent-ink: #101006;
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 @theme inline {

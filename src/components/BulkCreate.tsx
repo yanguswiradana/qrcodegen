@@ -149,13 +149,11 @@ export default function BulkCreate() {
         baris/batch. Rate limit 20/jam tetap berlaku — baris tidak valid
         ditandai sebelum dikirim agar tidak memakan kuota.
       </p>
-      <div className="mt-3 flex items-center gap-2">
-        <input
-          type="file"
-          accept=".csv,.txt"
-          onChange={onFile}
-          className="text-sm"
-        />
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <label className="qr-file text-sm">
+          <input type="file" accept=".csv,.txt" onChange={onFile} />
+          {rows.length > 0 ? "Ganti file" : "Pilih CSV"}
+        </label>
         {validCount > 0 && (
           <button
             onClick={run}
@@ -169,7 +167,7 @@ export default function BulkCreate() {
         )}
       </div>
       {truncated > 0 && (
-        <p className="mt-2 text-xs text-amber-600">
+        <p className="mt-2 text-xs text-amber-400">
           File melebihi {MAX_ROWS} baris — {truncated} baris terakhir
           diabaikan. Pecah jadi beberapa file.
         </p>
@@ -185,15 +183,15 @@ export default function BulkCreate() {
                   <td className="p-1 font-mono">{r.alias || "-"}</td>
                   <td className="p-1">
                     {r.invalid ? (
-                      <span className="text-amber-600">
+                      <span className="text-amber-400">
                         dilewati: {r.error}
                       </span>
                     ) : r.ok === undefined ? (
                       <span className="text-zinc-400">antre</span>
                     ) : r.ok ? (
-                      <span className="text-green-700">/r/{r.slug}</span>
+                      <span className="text-green-400">/r/{r.slug}</span>
                     ) : (
-                      <span className="text-red-600">{r.error}</span>
+                      <span className="text-red-400">{r.error}</span>
                     )}
                   </td>
                 </tr>
