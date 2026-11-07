@@ -114,11 +114,29 @@ export default function ApiKeys() {
       )}
       {msg && <p className="mt-2 text-sm text-red-400">{msg}</p>}
       {keys.map((k) => (
-        <div key={k.id} className="mt-2 flex items-center justify-between text-sm">
-          <span className="font-mono text-xs">
-            {k.prefix}... · {k.name}
-          </span>
-          <button onClick={() => remove(k.id)} className="text-xs text-red-400">
+        <div key={k.id} className="mt-2 flex items-start justify-between gap-2 text-sm">
+          <div className="min-w-0">
+            <p className="truncate font-mono text-xs">
+              {k.prefix}... · {k.name}
+            </p>
+            <p className="mt-0.5 text-[11px] text-zinc-400">
+              Dibuat{" "}
+              {new Date(k.created_at).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}{" "}
+              ·{" "}
+              {k.last_used_at
+                ? `dipakai ${new Date(k.last_used_at).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}`
+                : "belum pernah dipakai"}
+            </p>
+          </div>
+          <button onClick={() => remove(k.id)} className="shrink-0 text-xs text-red-400">
             Hapus
           </button>
         </div>
