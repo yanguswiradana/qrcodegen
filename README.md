@@ -116,6 +116,15 @@ Import repo → set env yang sama → deploy. Tambahkan domain prod ke
 Supabase Auth → URL Configuration (Site URL + Redirect `/auth/callback`).
 Country analytics memakai header `x-vercel-ip-country` (otomatis di Vercel).
 
+Opsional — purge scan otomatis (cron harian jam 03:00 UTC, hapus scan
+>3 bulan; total klik tidak terpengaruh). Tanpa env ini cron balas 503
+dan data tak tersentuh:
+
+- `CRON_SECRET` — string acak bebas (Vercel mengirimnya otomatis sebagai
+  `Authorization` ke cron).
+- `SUPABASE_SERVICE_ROLE_KEY` — Settings → API → `service_role`.
+  **Rahasia**: jangan pakai prefix `NEXT_PUBLIC_`, jangan commit.
+
 ## Dev
 
 ```bash

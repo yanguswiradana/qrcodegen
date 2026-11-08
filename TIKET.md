@@ -157,11 +157,11 @@
 - Export CSV semua link+scan, hapus akun + cascade. Estimasi M.
   Butuh bahasan: apakah perlu untuk portfolio/demo?
 
-### T-14 — Bilingual ID/EN [DIPUTUSKAN 2026-11-08: kerjakan]
+### T-14 — Bilingual ID/EN [DIPUTUSKAN 2026-11-08: kerjakan] ([#14](https://github.com/yanguswiradana/qrcodegen/issues/14))
 - Kamus `id`/`en` + toggle + cookie `qrgen_locale` (server baca cookie).
   Estimasi M–L.
 
-### T-15 — Purge scan >3 bulan (keputusan L 2026-11-08)
+### T-15 — Purge scan >3 bulan (keputusan L 2026-11-08) ([#13](https://github.com/yanguswiradana/qrcodegen/issues/13))
 - RPC `purge_old_scans()` + cron harian (Vercel Cron → `/api/maintenance/purge`,
   guard `CRON_SECRET`). Total klik awet (`links.clicks` tak tersentuh);
   breakdown device/browser/negara = trailing 3 bulan. Window 1 baris bila
