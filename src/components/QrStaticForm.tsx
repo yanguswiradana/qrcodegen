@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toPngDataUrl, toSvg } from "@/lib/qr";
+import { toPngDataUrl, toFancySvg } from "@/lib/qr";
 
 function drawLogo(img: HTMLImageElement, png: string): Promise<string> {
   return new Promise((resolve) => {
@@ -89,7 +89,6 @@ export default function QrStaticForm({
   const [caption, setCaption] = useState("");
   const [size, setSize] = useState(512);
   const [png, setPng] = useState("");
-  const [svg, setSvg] = useState("");
   const [logoPreview, setLogoPreview] = useState("");
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState("");
@@ -103,7 +102,6 @@ export default function QrStaticForm({
     try {
       const style = { color, bg, ecc };
       let out = await toPngDataUrl(text, { ...style, width: size });
-      setSvg(await toSvg(text, style));
       if (logoPreview) {
         let logo: HTMLImageElement;
         try {
@@ -144,6 +142,35 @@ export default function QrStaticForm({
     a.href = href;
     a.download = name;
     a.click();
+  }
+
+  // SVG dibangun saat klik agar selalu sinkron dengan state (logo/frame/ECC).
+  async function downloadSvg() {
+    let lw = 0;
+    let lh = 0;
+    if (logoPreview) {
+      try {
+        const img = await loadImage(logoPreview);
+        lw = img.naturalWidth || img.width;
+        lh = img.naturalHeight || img.height;
+      } catch {
+        /* logo rusak: unduh versi tanpa logo */
+      }
+    }
+    const out = await toFancySvg(text, {
+      color,
+      bg,
+      ecc,
+      logoDataUrl: lw && lh ? logoPreview : undefined,
+      logoW: lw,
+      logoH: lh,
+      frame,
+      caption,
+    });
+    download(
+      "data:image/svg+xml;charset=utf-8," + encodeURIComponent(out),
+      "qr.svg"
+    );
   }
 
   return (
@@ -249,12 +276,7 @@ export default function QrStaticForm({
             <button onClick={() => download(png, `qr-${size}.png`)} className="qr-btn">
               PNG {size}px
             </button>
-            <button
-              onClick={() =>
-                download("data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg), "qr.svg")
-              }
-              className="qr-btn-ghost"
-            >
+            <button onClick={downloadSvg} className="qr-btn-ghost">
               SVG
             </button>
           </div>
