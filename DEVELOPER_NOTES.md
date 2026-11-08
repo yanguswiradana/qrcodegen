@@ -135,3 +135,7 @@ BUKAN sumber migrasi (jangan push ulang — policy duplikat).
 - OSS MIT + demo Vercel sebagai portfolio (hybrid, bukan SaaS berbayar).
 - Short domain custom: TIDAK dipakai (keputusan 2026-11-08) — env
   `NEXT_PUBLIC_SHORT_DOMAIN` dicabut; `shortBase()` = origin runtime.
+- Bilingual ID/EN (2026-11-08): kamus `src/lib/i18n.ts` (TS paksa `en`
+  lengkap), cookie `qrgen_locale` sumber utama. Client: `useT()` via
+  `LocaleProvider` + `LocaleToggle`. Server: `getLocale()` (next/headers).
+  String baru WAJIB tambah di dua bahasa; pesan API ikut locale via cookie.

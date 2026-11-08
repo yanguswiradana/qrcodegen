@@ -25,6 +25,7 @@ Live demo (portfolio): https://qrcodegen-arxcode.vercel.app/
   `/api/links`, CRUD `/api/keys` (lihat [dokumentasi API](#api))
 - Freemium: landing 3x QR anonim (localStorage), login = unlimited
 - Auth: email + password (Supabase)
+- Bilingual ID/EN (toggle, tersimpan di cookie)
 
 ## API
 
