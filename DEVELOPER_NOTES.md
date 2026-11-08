@@ -75,6 +75,20 @@ Urutan migrasi remote saat ini:
    `auth_api_key` diganti `set search_path = public, extensions`. pgcrypto di
    Supabase terinstal di skema `extensions`; search_path lama (= public saja)
    bikin `digest()` 42883 → link password tak pernah terbuka + API key mati.
+9. `20261107145521_pw_rate_limit` — `verify_link_password` hitung gagal/jam
+   per slug di `rate_buckets` (`pw:<slug>`, max 10/jam), benar = reset.
+10. `20261107145625_check_rate_owner` — `check_rate` tolak anon & key milik
+    orang lain; tambah `check_rate_key` (verifikasi digest internal) untuk
+    jalur API key.
+11. `20261107150057_api_links_rpc` — `api_create_link` + `api_list_links`.
+    Mode Bearer tanpa JWT selalu gagal RLS → seluruh tulis/baca API lewat
+    RPC definer ini (validasi + rate limit di dalam).
+12. `20261108022502_scans_browser_country` — kolom `scans.browser`,
+    `resolve_link` tambah `p_browser`/`p_country`, `link_stats` tambah
+    `by_country`/`by_browser`. (Awalnya 42702 ambiguitas `created_at` —
+    OUT param bentrok kolom tak berkualifikasi.)
+13. `20261108022931_fix_link_stats_ambiguous2` — kualifikasi `s.created_at`
+    dkk dengan alias `s` (pelajaran #3 terulang, jangan diulangi lagi).
 
 File `supabase/schema.sql` + `supabase/migration_002.sql` adalah arsip awal,
 BUKAN sumber migrasi (jangan push ulang — policy duplikat).
