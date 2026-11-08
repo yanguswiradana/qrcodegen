@@ -10,6 +10,9 @@
 > netral; B=validasi prefix+ownership + RPC khusus API key; E=boleh rename
 > dengan konfirmasi + warning QR lama mati; J=tabel sekarang cukup (<500
 > link), T-06 ditunda sampai skala menuntut.
+> Keputusan owner 2026-11-08 (diterapkan): D=negara dari header Vercel saja
+> (gratis, kasar); F=embed PNG berlogo/frame di dalam SVG (QR tetap vektor);
+> G=skrip `npm run smoke` ringan (Playwright bila regresi kejadian lagi).
 
 ## P0 — Wajib duluan (rusak / basi cepat)
 
