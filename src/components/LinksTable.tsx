@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import LinkRowActions from "@/components/LinkRowActions";
 import QrDownloadButton from "@/components/QrDownloadButton";
+import QrBulkZip from "@/components/QrBulkZip";
 
 export type LinkRow = {
   slug: string;
@@ -128,6 +129,7 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
               : `Hapus ${activeSelected.size} dipilih`}
           </button>
         )}
+        <QrBulkZip slugs={filtered.map((l) => l.slug)} />
         <span className="ml-auto text-xs text-zinc-400">
           {filtered.length === 0
             ? "0 link"
