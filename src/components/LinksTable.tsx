@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import LinkRowActions from "@/components/LinkRowActions";
 import QrDownloadButton from "@/components/QrDownloadButton";
@@ -16,42 +16,76 @@ export type LinkRow = {
 
 const PER_PAGE = 10;
 
-export default function LinksTable({ links }: { links: LinkRow[] }) {
+export default function LinksTable() {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
   const [page, setPage] = useState(1);
+  const [rows, setRows] = useState<LinkRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [bulkMsg, setBulkMsg] = useState("");
+  const reqId = useRef(0);
+  const totalRef = useRef(0);
 
-  // Pilihan aktif = irisan dengan data terbaru dari server,
-  // jadi slug yang sudah terhapus (single delete → refresh) otomatis gugur.
-  const activeSelected = useMemo(() => {
-    const valid = new Set(links.map((l) => l.slug));
-    return new Set([...selected].filter((s) => valid.has(s)));
-  }, [links, selected]);
+  // Debounce ketikan search.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setDebounced(query);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(id);
+  }, [query]);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return links;
-    return links.filter(
-      (l) =>
-        l.slug.toLowerCase().includes(q) ||
-        l.target_url.toLowerCase().includes(q)
-    );
-  }, [links, query]);
+  const load = useCallback(async () => {
+    const my = ++reqId.current;
+    setLoading(true);
+    setLoadError("");
+    // Jepit halaman ke rentang valid dari total terakhir (tanpa setState:
+    // hasil fetch terbaru mengoreksi total di render berikut).
+    const totalPages = Math.max(1, Math.ceil(totalRef.current / PER_PAGE));
+    const reqPage = Math.min(page, totalPages);
+    try {
+      const res = await fetch(
+        `/api/links?q=${encodeURIComponent(debounced)}&page=${reqPage}&per_page=${PER_PAGE}`
+      );
+      const data = await res.json().catch(() => ({}));
+      if (reqId.current !== my) return;
+      if (!res.ok) {
+        setLoadError(data.error ?? "Gagal memuat link");
+        return;
+      }
+      totalRef.current = data.total ?? 0;
+      setRows((data.links ?? []) as LinkRow[]);
+      setTotal(totalRef.current);
+    } catch {
+      if (reqId.current === my) setLoadError("Network");
+    } finally {
+      if (reqId.current === my) setLoading(false);
+    }
+  }, [debounced, page]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  // setState lewat callback (bukan sinkron di body effect).
+  useEffect(() => {
+    const id = setTimeout(() => {
+      load();
+    }, 0);
+    return () => clearTimeout(id);
+  }, [load]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * PER_PAGE;
-  const pageRows = filtered.slice(start, start + PER_PAGE);
   // Dibaca sekali per render — badge "lewat" stabil selama render ini.
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
 
-  const pageSlugs = pageRows.map((l) => l.slug);
+  const pageSlugs = rows.map((l) => l.slug);
   const allPageSelected =
-    pageSlugs.length > 0 && pageSlugs.every((s) => activeSelected.has(s));
+    pageSlugs.length > 0 && pageSlugs.every((s) => selected.has(s));
 
   function toggleOne(slug: string) {
     setSelected((prev) => {
@@ -72,16 +106,16 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
   }
 
   async function bulkDelete() {
-    if (activeSelected.size === 0 || deleting) return;
+    if (selected.size === 0 || deleting) return;
     if (
       !confirm(
-        `Hapus ${activeSelected.size} link? QR cetak ikut mati dan tidak bisa dibatalkan.`
+        `Hapus ${selected.size} link? QR cetak ikut mati dan tidak bisa dibatalkan.`
       )
     )
       return;
     setDeleting(true);
     setBulkMsg("");
-    const slugs = [...activeSelected];
+    const slugs = [...selected];
     let ok = 0;
     const failed: string[] = [];
     for (const slug of slugs) {
@@ -104,6 +138,7 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
         : `${ok} terhapus, gagal: ${failed.join(", ")}`
     );
     router.refresh();
+    load();
   }
 
   return (
@@ -111,14 +146,11 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
       <div className="flex flex-wrap items-center gap-2">
         <input
           value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setQuery(e.target.value)}
           placeholder="Cari slug / tujuan…"
           className="qr-input max-w-64 text-sm"
         />
-        {activeSelected.size > 0 && (
+        {selected.size > 0 && (
           <button
             onClick={bulkDelete}
             disabled={deleting}
@@ -126,24 +158,27 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
           >
             {deleting
               ? "Menghapus…"
-              : `Hapus ${activeSelected.size} dipilih`}
+              : `Hapus ${selected.size} dipilih`}
           </button>
         )}
-        <QrBulkZip slugs={filtered.map((l) => l.slug)} />
+        <QrBulkZip query={debounced} />
         <span className="ml-auto text-xs text-zinc-400">
-          {filtered.length === 0
-            ? "0 link"
-            : `${start + 1}–${start + pageRows.length} dari ${filtered.length} link`}
-          {query.trim() && ` (filter dari ${links.length})`}
+          {loading
+            ? "Memuat…"
+            : total === 0
+              ? "0 link"
+              : `${start + 1}–${start + rows.length} dari ${total} link`}
+          {query.trim() && ` (filter: "${query.trim()}")`}
         </span>
       </div>
       {bulkMsg && <p className="mt-2 text-xs text-zinc-400">{bulkMsg}</p>}
+      {loadError && <p className="mt-2 text-xs text-red-400">{loadError}</p>}
 
-      {filtered.length === 0 ? (
+      {!loading && total === 0 ? (
         <p className="mt-4 text-sm text-zinc-400">
-          {links.length === 0
-            ? "Belum ada link."
-            : `Tidak ada link yang cocok dengan "${query.trim()}".`}
+          {debounced.trim()
+            ? `Tidak ada link yang cocok dengan "${debounced.trim()}".`
+            : "Belum ada link."}
         </p>
       ) : (
         <div className="mt-2 overflow-x-auto qr-card">
@@ -167,12 +202,12 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
               </tr>
             </thead>
             <tbody>
-              {pageRows.map((l) => (
+              {rows.map((l) => (
                 <tr key={l.slug}>
                   <td>
                     <input
                       type="checkbox"
-                      checked={activeSelected.has(l.slug)}
+                      checked={selected.has(l.slug)}
                       onChange={() => toggleOne(l.slug)}
                     />
                   </td>
@@ -213,7 +248,11 @@ export default function LinksTable({ links }: { links: LinkRow[] }) {
                     <QrDownloadButton slug={l.slug} />
                   </td>
                   <td>
-                    <LinkRowActions slug={l.slug} targetUrl={l.target_url} />
+                    <LinkRowActions
+                      slug={l.slug}
+                      targetUrl={l.target_url}
+                      onChanged={load}
+                    />
                   </td>
                 </tr>
               ))}

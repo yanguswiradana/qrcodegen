@@ -5,15 +5,27 @@ import JSZip from "jszip";
 import { toPngDataUrl } from "@/lib/qr";
 import { shortBase } from "@/lib/short";
 
-export default function QrBulkZip({ slugs }: { slugs: string[] }) {
+// Unduh ZIP semua link yang cocok filter (maks 200, bukan cuma halaman ini).
+export default function QrBulkZip({ query }: { query: string }) {
   const [zipping, setZipping] = useState(false);
   const [progress, setProgress] = useState("");
 
   async function downloadZip() {
-    if (zipping || slugs.length === 0) return;
+    if (zipping) return;
     setZipping(true);
     setProgress("");
     try {
+      const res = await fetch(
+        `/api/links?q=${encodeURIComponent(query)}&per_page=200`
+      );
+      const data = await res.json().catch(() => ({}));
+      const slugs: string[] = (data.links ?? []).map(
+        (l: { slug: string }) => l.slug
+      );
+      if (slugs.length === 0) {
+        setProgress("tidak ada");
+        return;
+      }
       const zip = new JSZip();
       let n = 0;
       for (const slug of slugs) {
@@ -37,16 +49,14 @@ export default function QrBulkZip({ slugs }: { slugs: string[] }) {
     }
   }
 
-  if (slugs.length === 0) return null;
-
   return (
     <button
       onClick={downloadZip}
       disabled={zipping}
-      title="Unduh semua QR di daftar ini sebagai ZIP"
-      className="qr-btn-ghost px-3 py-1.5 text-sm disabled:opacity-50"
+      title="Unduh semua QR yang cocok filter sebagai ZIP (maks 200)"
+      className="qr-btn-ghost px-3 py-1 text-sm disabled:opacity-50"
     >
-      {zipping ? `Menyiapkan ${progress}…` : `Unduh ZIP (${slugs.length})`}
+      {zipping ? `Menyiapkan ${progress}…` : "Unduh ZIP"}
     </button>
   );
 }

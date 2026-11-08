@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import QrStaticForm from "@/components/QrStaticForm";
 import QrDynamicForm from "@/components/QrDynamicForm";
 import BulkCreate from "@/components/BulkCreate";
-import LinksList from "@/components/LinksList";
+import LinksTable from "@/components/LinksTable";
 import ScansPanel from "@/components/ScansPanel";
 import ScansChart from "@/components/ScansChart";
 import ApiKeys from "@/components/ApiKeys";
@@ -64,7 +64,7 @@ export default async function DashboardPage() {
 
       <div className="mt-8 scroll-mt-6" id="links">
         <h2 className="text-lg font-semibold">Short link</h2>
-        <LinksList />
+        <LinksTable />
       </div>
 
       <div className="mt-8 scroll-mt-6" id="scans">

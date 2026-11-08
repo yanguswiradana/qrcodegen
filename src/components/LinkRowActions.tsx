@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 export default function LinkRowActions({
   slug,
   targetUrl,
+  onChanged,
 }: {
   slug: string;
   targetUrl: string;
+  onChanged?: () => void;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -50,6 +52,7 @@ export default function LinkRowActions({
       if (!res.ok) return setMsg(data.error ?? "Gagal");
       setEditing(false);
       setNewSlug("");
+      onChanged?.();
       router.refresh();
     } finally {
       setBusy(null);
@@ -66,6 +69,7 @@ export default function LinkRowActions({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) return setMsg(data.error ?? "Gagal");
+      onChanged?.();
       router.refresh();
     } finally {
       setBusy(null);

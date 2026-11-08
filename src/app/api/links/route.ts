@@ -284,33 +284,53 @@ export async function DELETE(request: Request) {
 
 export async function GET(request: Request) {
   const supabase = await createClient();
-  let userId: string | null = null;
+
+  const { searchParams } = new URL(request.url);
+  const q = (searchParams.get("q") ?? "").trim().slice(0, 100);
+  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+  const perPage = Math.min(
+    200,
+    Math.max(1, parseInt(searchParams.get("per_page") ?? "50", 10) || 50)
+  );
+  const from = (page - 1) * perPage;
+  const to = from + perPage - 1;
+  // Escape wildcard untuk pola ilike PostgREST.
+  const esc = q.replace(/[\\%]/g, (c) => `\\${c}`);
 
   const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (bearer) {
     // Jalur API key lewat RPC definer (anon tanpa JWT dibatasi RLS).
-    const { data } = await supabase.rpc("api_list_links", { p_key: bearer });
-    const rows = (data ?? []) as unknown[];
-    if (rows.length === 0) {
-      const { data: uid } = await supabase.rpc("auth_api_key", { p_key: bearer });
-      if (!(uid as string)) {
-        return NextResponse.json({ error: "API key salah" }, { status: 401 });
-      }
+    const { data } = await supabase.rpc("api_list_links", {
+      p_key: bearer,
+      p_query: q,
+      p_page: page,
+      p_per_page: perPage,
+    });
+    const r = (data ?? {}) as {
+      ok?: boolean;
+      links?: unknown[];
+      total?: number;
+    };
+    if (!r.ok) {
+      return NextResponse.json({ error: "API key salah" }, { status: 401 });
     }
-    return NextResponse.json({ links: rows });
-  } else {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Login dulu" }, { status: 401 });
-    userId = user.id;
+    return NextResponse.json({ links: r.links ?? [], total: r.total ?? 0 });
   }
 
-  const { data } = await supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Login dulu" }, { status: 401 });
+
+  let query = supabase
     .from("links")
-    .select("slug, target_url, clicks, expires_at, created_at")
-    .eq("created_by", userId)
+    .select("slug, target_url, clicks, expires_at, created_at", { count: "exact" })
+    .eq("created_by", user.id)
     .order("created_at", { ascending: false })
-    .limit(50);
-  return NextResponse.json({ links: data ?? [] });
+    .range(from, to);
+  if (esc) {
+    query = query.or(`slug.ilike.%${esc}%,target_url.ilike.%${esc}%`);
+  }
+  const { data, count } = await query;
+  return NextResponse.json({ links: data ?? [], total: count ?? 0 });
 }
