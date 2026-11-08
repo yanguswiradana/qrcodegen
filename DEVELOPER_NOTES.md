@@ -128,9 +128,10 @@ BUKAN sumber migrasi (jangan push ulang — policy duplikat).
 
 ## 6. Keputusan produk yang berlaku
 
-- Freemium: landing 3x QR anonim (localStorage — gate lembut, bisa reset
-  via incognito; itu disadari, bukan bug). Server-side gate ditunda sampai
-  ada sinyal abuse.
+- Freemium: landing 3x QR anonim per 6 jam (`qrgen_free_quota` =
+  `{used, resetAt}`, pulih otomatis + countdown; migrasi sekali dari format
+  lama `qrgen_free_count`). Gate tetap lembut (incognito reset) — disadari,
+  bukan bug. Server-side gate ditunda sampai ada sinyal abuse.
 - Login/dashboard disembunyikan dari publik; owner akses manual.
 - OSS MIT + demo Vercel sebagai portfolio (hybrid, bukan SaaS berbayar).
 - Short domain custom: TIDAK dipakai (keputusan 2026-11-08) — env

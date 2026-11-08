@@ -23,7 +23,7 @@ Live demo (portfolio): https://qrcodegen-arxcode.vercel.app/
   operasi publik/privileged lewat RPC `SECURITY DEFINER`
 - API: key per user (`Authorization: Bearer qrgen_...`), POST/GET/PATCH/DELETE
   `/api/links`, CRUD `/api/keys` (lihat [dokumentasi API](#api))
-- Freemium: landing 3x QR anonim (localStorage), login = unlimited
+- Freemium: landing 3x QR anonim per 6 jam (localStorage, pulih otomatis + countdown), login = unlimited
 - Auth: email + password (Supabase)
 - Bilingual ID/EN (toggle, tersimpan di cookie)
 

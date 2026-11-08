@@ -24,6 +24,8 @@ const id = {
   freeLeft: "Coba gratis: sisa {left} dari {total} QR.",
   freeUsed: "Kuota gratis habis (3/3).",
   lockedTitle: "Kuota coba gratis habis",
+  resetIn: "Pulih lagi dalam ±{t}.",
+  windowNote: "Kuota pulih tiap 6 jam.",
   lockedSub:
     "Kuota 3x di browser ini sudah terpakai. Buka jendela incognito untuk coba lagi, atau hubungi pemilik untuk akses penuh.",
   staticTitle: "Static QR",
@@ -197,6 +199,8 @@ const en: Record<MsgKey, string> = {
   freeLeft: "Free trial: {left} of {total} QR left.",
   freeUsed: "Free quota used up (3/3).",
   lockedTitle: "Free trial quota exhausted",
+  resetIn: "Resets in ±{t}.",
+  windowNote: "Quota resets every 6 hours.",
   lockedSub:
     "The 3 tries in this browser are used up. Open an incognito window to try again, or contact the owner for full access.",
   staticTitle: "Static QR",
