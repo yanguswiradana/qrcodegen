@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useT } from "@/components/LocaleProvider";
 
 export default function PasswordGate({
   slug,
@@ -10,6 +11,7 @@ export default function PasswordGate({
   slug: string;
   error?: string;
 }) {
+  const t = useT();
   const router = useRouter();
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
@@ -21,7 +23,7 @@ export default function PasswordGate({
 
   return (
     <main className="mx-auto max-w-sm px-6 py-20">
-      <h1 className="text-xl font-bold">Link terkunci</h1>
+      <h1 className="text-xl font-bold">{t("gateTitle")}</h1>
       <p className="mt-1 font-mono text-sm text-zinc-400">/r/{slug}</p>
       <form onSubmit={submit} className="mt-4 flex flex-col gap-2">
         <input
@@ -29,7 +31,7 @@ export default function PasswordGate({
           required
           value={pw}
           onChange={(e) => setPw(e.target.value)}
-          placeholder="Password link"
+          placeholder={t("gatePwPh")}
           autoFocus
           className="qr-input"
         />
@@ -39,10 +41,10 @@ export default function PasswordGate({
             onClick={() => setShow((s) => !s)}
             className="text-xs text-zinc-400 underline underline-offset-4"
           >
-            {show ? "Sembunyikan" : "Tampilkan"}
+            {show ? t("hide") : t("show")}
           </button>
         </div>
-        <button className="qr-btn">Buka</button>
+        <button className="qr-btn">{t("unlock")}</button>
       </form>
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
     </main>

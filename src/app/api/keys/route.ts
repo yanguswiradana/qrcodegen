@@ -1,6 +1,19 @@
 import { NextResponse } from "next/server";
 import { createHash, randomBytes } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
+import { LOCALE_COOKIE, tx, type Locale, type MsgKey } from "@/lib/i18n";
+
+function localeOf(request: Request): Locale {
+  const m = request.headers
+    .get("cookie")
+    ?.match(new RegExp(`(?:^|; )${LOCALE_COOKIE}=(id|en)`));
+  return m ? (m[1] as Locale) : "id";
+}
+
+function tOf(request: Request) {
+  const locale = localeOf(request);
+  return (key: MsgKey) => tx(locale, key);
+}
 
 function hash(s: string) {
   return createHash("sha256").update(s).digest("hex");
@@ -9,10 +22,11 @@ function hash(s: string) {
 // POST: buat key baru (plaintext tampil SEKALI di response).
 export async function POST(request: Request) {
   const supabase = await createClient();
+  const t = tOf(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Login dulu" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: t("apiLogin") }, { status: 401 });
 
   const body = await request.json().catch(() => null);
   const name = body?.name?.trim() || "default";
@@ -29,12 +43,13 @@ export async function POST(request: Request) {
   return NextResponse.json({ api_key: raw, prefix });
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = await createClient();
+  const t = tOf(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Login dulu" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: t("apiLogin") }, { status: 401 });
 
   const { data } = await supabase
     .from("api_keys")
@@ -46,14 +61,15 @@ export async function GET() {
 
 export async function DELETE(request: Request) {
   const supabase = await createClient();
+  const t = tOf(request);
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Login dulu" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: t("apiLogin") }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
-  if (!id) return NextResponse.json({ error: "id wajib" }, { status: 400 });
+  if (!id) return NextResponse.json({ error: t("apiIdRequired") }, { status: 400 });
 
   const { error } = await supabase
     .from("api_keys")

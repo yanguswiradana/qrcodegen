@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { LocaleProvider, useT } from "@/components/LocaleProvider";
+import LocaleToggle from "@/components/LocaleToggle";
 
-export default function LoginPage() {
+function LoginInner() {
+  const t = useT();
   const router = useRouter();
   const supabase = createClient();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -27,7 +30,7 @@ export default function LoginPage() {
         router.push("/dashboard");
         router.refresh();
       } else {
-        setInfo("Akun dibuat. Cek email verifikasi, lalu masuk.");
+        setInfo(t("signupInfo"));
         setMode("signin");
       }
       return;
@@ -41,22 +44,25 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto max-w-sm px-6 py-20">
-      <h1 className="text-2xl font-bold">
-        {mode === "signin" ? "Masuk" : "Daftar"}
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">
+          {mode === "signin" ? t("signIn") : t("signUp")}
+        </h1>
+        <LocaleToggle />
+      </div>
 
       <div className="mt-4 flex gap-2 text-sm">
         <button
           onClick={() => setMode("signin")}
           className={mode === "signin" ? "qr-btn px-3 py-1" : "qr-btn-ghost px-3 py-1"}
         >
-          Masuk
+          {t("signIn")}
         </button>
         <button
           onClick={() => setMode("signup")}
           className={mode === "signup" ? "qr-btn px-3 py-1" : "qr-btn-ghost px-3 py-1"}
         >
-          Daftar
+          {t("signUp")}
         </button>
       </div>
 
@@ -64,7 +70,7 @@ export default function LoginPage() {
         <input
           type="email"
           required
-          placeholder="email@contoh.com"
+          placeholder={t("emailPh")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="qr-input"
@@ -73,7 +79,7 @@ export default function LoginPage() {
           type="password"
           required
           minLength={6}
-          placeholder="Password (min 6)"
+          placeholder={t("loginPwPh")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="qr-input"
@@ -82,12 +88,20 @@ export default function LoginPage() {
           disabled={loading}
           className="qr-btn py-2 disabled:opacity-50"
         >
-          {loading ? "..." : mode === "signin" ? "Masuk" : "Buat akun"}
+          {loading ? "..." : mode === "signin" ? t("loginBtn") : t("registerBtn")}
         </button>
       </form>
 
       {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
       {info && <p className="mt-4 text-sm text-green-400">{info}</p>}
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <LocaleProvider initial="id">
+      <LoginInner />
+    </LocaleProvider>
   );
 }

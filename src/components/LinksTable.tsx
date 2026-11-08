@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import LinkRowActions from "@/components/LinkRowActions";
 import QrDownloadButton from "@/components/QrDownloadButton";
 import QrBulkZip from "@/components/QrBulkZip";
+import { useLocale, useT } from "@/components/LocaleProvider";
+import { dateLocale } from "@/lib/i18n";
 
 export type LinkRow = {
   slug: string;
@@ -17,6 +19,9 @@ export type LinkRow = {
 const PER_PAGE = 10;
 
 export default function LinksTable() {
+  const t = useT();
+  const { locale } = useLocale();
+  const dl = dateLocale(locale);
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -55,18 +60,18 @@ export default function LinksTable() {
       const data = await res.json().catch(() => ({}));
       if (reqId.current !== my) return;
       if (!res.ok) {
-        setLoadError(data.error ?? "Gagal memuat link");
+        setLoadError(data.error ?? t("loadFail"));
         return;
       }
       totalRef.current = data.total ?? 0;
       setRows((data.links ?? []) as LinkRow[]);
       setTotal(totalRef.current);
     } catch {
-      if (reqId.current === my) setLoadError("Network");
+      if (reqId.current === my) setLoadError(t("network"));
     } finally {
       if (reqId.current === my) setLoading(false);
     }
-  }, [debounced, page]);
+  }, [debounced, page, t]);
 
   // setState lewat callback (bukan sinkron di body effect).
   useEffect(() => {
@@ -107,12 +112,7 @@ export default function LinksTable() {
 
   async function bulkDelete() {
     if (selected.size === 0 || deleting) return;
-    if (
-      !confirm(
-        `Hapus ${selected.size} link? QR cetak ikut mati dan tidak bisa dibatalkan.`
-      )
-    )
-      return;
+    if (!confirm(t("bulkDelConfirm", { n: selected.size }))) return;
     setDeleting(true);
     setBulkMsg("");
     const slugs = [...selected];
@@ -134,8 +134,8 @@ export default function LinksTable() {
     setSelected(new Set());
     setBulkMsg(
       failed.length === 0
-        ? `${ok} link terhapus.`
-        : `${ok} terhapus, gagal: ${failed.join(", ")}`
+        ? t("deletedOk", { n: ok })
+        : t("deletedPart", { ok, fail: failed.join(", ") })
     );
     router.refresh();
     load();
@@ -147,7 +147,7 @@ export default function LinksTable() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Cari slug / tujuan…"
+          placeholder={t("searchPh")}
           className="qr-input max-w-64 text-sm"
         />
         {selected.size > 0 && (
@@ -156,19 +156,17 @@ export default function LinksTable() {
             disabled={deleting}
             className="qr-btn-ghost px-3 py-1.5 text-sm text-red-400 disabled:opacity-50"
           >
-            {deleting
-              ? "Menghapus…"
-              : `Hapus ${selected.size} dipilih`}
+            {deleting ? t("deleting") : t("delSelected", { n: selected.size })}
           </button>
         )}
         <QrBulkZip query={debounced} />
         <span className="ml-auto text-xs text-zinc-400">
           {loading
-            ? "Memuat…"
+            ? t("loading")
             : total === 0
-              ? "0 link"
-              : `${start + 1}–${start + rows.length} dari ${total} link`}
-          {query.trim() && ` (filter: "${query.trim()}")`}
+              ? t("countZero")
+              : t("countRange", { a: start + 1, b: start + rows.length, total })}
+          {query.trim() && t("filterSuffix", { q: query.trim() })}
         </span>
       </div>
       {bulkMsg && <p className="mt-2 text-xs text-zinc-400">{bulkMsg}</p>}
@@ -176,9 +174,7 @@ export default function LinksTable() {
 
       {!loading && total === 0 ? (
         <p className="mt-4 text-sm text-zinc-400">
-          {debounced.trim()
-            ? `Tidak ada link yang cocok dengan "${debounced.trim()}".`
-            : "Belum ada link."}
+          {debounced.trim() ? t("emptySearch", { q: debounced.trim() }) : t("empty")}
         </p>
       ) : (
         <div className="mt-2 overflow-x-auto qr-card">
@@ -190,15 +186,15 @@ export default function LinksTable() {
                     type="checkbox"
                     checked={allPageSelected}
                     onChange={togglePage}
-                    title="Pilih semua di halaman ini"
+                    title={t("selectAllTitle")}
                   />
                 </th>
-                <th>Slug</th>
-                <th>Tujuan</th>
-                <th>Klik</th>
-                <th>Expired</th>
-                <th>QR</th>
-                <th>Aksi</th>
+                <th>{t("colSlug")}</th>
+                <th>{t("colTarget")}</th>
+                <th>{t("colClicks")}</th>
+                <th>{t("colExpiry")}</th>
+                <th>{t("colQr")}</th>
+                <th>{t("colActions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -220,27 +216,27 @@ export default function LinksTable() {
                       /r/{l.slug}
                     </a>{" "}
                     {l.has_password && (
-                      <span title="Berpassword">🔒</span>
+                      <span title={t("pwTitle")}>🔒</span>
                     )}{" "}
                     <a
                       href={`/s/${l.slug}`}
                       target="_blank"
                       className="text-xs text-zinc-400"
-                      title="Statistik publik"
+                      title={t("statsTitle")}
                     >
-                      stats
+                      {t("statsLink")}
                     </a>
                   </td>
                   <td className="max-w-64 truncate">{l.target_url}</td>
                   <td>{l.clicks}</td>
                   <td className="text-xs">
                     {l.expires_at
-                      ? new Date(l.expires_at).toLocaleDateString("id-ID")
+                      ? new Date(l.expires_at).toLocaleDateString(dl)
                       : "-"}
                     {l.expires_at &&
                       new Date(l.expires_at).getTime() <= now && (
                         <span className="ml-1 rounded border border-red-400/30 px-1 py-px text-[10px] text-red-400">
-                          lewat
+                          {t("expiredBadge")}
                         </span>
                       )}
                   </td>
@@ -268,7 +264,7 @@ export default function LinksTable() {
             disabled={safePage <= 1}
             className="qr-btn-ghost px-2 py-1 text-xs disabled:opacity-40"
           >
-            ← Prev
+            {t("prevBtn")}
           </button>
           {Array.from({ length: totalPages }, (_, i) => i + 1)
             .filter(
@@ -309,7 +305,7 @@ export default function LinksTable() {
             disabled={safePage >= totalPages}
             className="qr-btn-ghost px-2 py-1 text-xs disabled:opacity-40"
           >
-            Next →
+            {t("nextBtn")}
           </button>
         </div>
       )}

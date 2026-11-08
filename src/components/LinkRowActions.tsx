@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useT } from "@/components/LocaleProvider";
 
 export default function LinkRowActions({
   slug,
@@ -12,6 +13,7 @@ export default function LinkRowActions({
   targetUrl: string;
   onChanged?: () => void;
 }) {
+  const t = useT();
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [url, setUrl] = useState(targetUrl);
@@ -27,12 +29,7 @@ export default function LinkRowActions({
     const ns = newSlug.trim();
     const renaming = ns !== "" && ns !== slug;
     if (renaming) {
-      if (
-        !confirm(
-          `Ganti alias /r/${slug} jadi /r/${ns}? QR cetak lama ikut mati.`
-        )
-      )
-        return;
+      if (!confirm(t("renameConfirm", { slug, ns }))) return;
     }
     setMsg("");
     setBusy("save");
@@ -49,7 +46,7 @@ export default function LinkRowActions({
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) return setMsg(data.error ?? "Gagal");
+      if (!res.ok) return setMsg(data.error ?? t("failed"));
       setEditing(false);
       setNewSlug("");
       onChanged?.();
@@ -61,14 +58,14 @@ export default function LinkRowActions({
 
   async function remove() {
     if (busy) return;
-    if (!confirm(`Hapus /r/${slug}? QR cetak ikut mati.`)) return;
+    if (!confirm(t("delConfirm", { slug }))) return;
     setBusy("del");
     try {
       const res = await fetch(`/api/links?slug=${encodeURIComponent(slug)}`, {
         method: "DELETE",
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) return setMsg(data.error ?? "Gagal");
+      if (!res.ok) return setMsg(data.error ?? t("failed"));
       onChanged?.();
       router.refresh();
     } finally {
@@ -87,14 +84,14 @@ export default function LinkRowActions({
           }}
           className="qr-btn-ghost px-2 py-1 text-xs"
         >
-          Edit
+          {t("rowEdit")}
         </button>
         <button
           onClick={remove}
           disabled={busy !== null}
           className="qr-btn-ghost px-2 py-1 text-xs text-red-400 disabled:opacity-50"
         >
-          {busy === "del" ? "…" : "Hapus"}
+          {busy === "del" ? "…" : t("rowDelete")}
         </button>
       </div>
     );
@@ -114,20 +111,20 @@ export default function LinkRowActions({
         className="qr-input w-48 text-xs"
       />
       <input
-        value={newSlug}
-        onChange={(e) => setNewSlug(e.target.value)}
-        placeholder="Alias baru (opsional)"
-        className="qr-input w-48 font-mono text-xs"
-      />
-      <input
         type="password"
         value={password}
         onChange={(e) => {
           setPassword(e.target.value);
           setPwTouched(true);
         }}
-        placeholder="Password baru (kosongkan = lepas)"
+        placeholder={t("newPwPh")}
         className="qr-input w-48 text-xs"
+      />
+      <input
+        value={newSlug}
+        onChange={(e) => setNewSlug(e.target.value)}
+        placeholder={t("newAliasPh")}
+        className="qr-input w-48 font-mono text-xs"
       />
       <div className="flex gap-1">
         <button
@@ -135,14 +132,14 @@ export default function LinkRowActions({
           disabled={busy !== null}
           className="qr-btn px-2 py-1 text-xs disabled:opacity-50"
         >
-          {busy === "save" ? "…" : "Simpan"}
+          {busy === "save" ? "…" : t("rowSave")}
         </button>
         <button
           onClick={() => setEditing(false)}
           disabled={busy !== null}
           className="qr-btn-ghost px-2 py-1 text-xs disabled:opacity-50"
         >
-          Batal
+          {t("rowCancel")}
         </button>
       </div>
       {msg && <p className="text-xs text-red-400">{msg}</p>}

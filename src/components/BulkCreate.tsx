@@ -2,16 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useT } from "@/components/LocaleProvider";
+import type { MsgKey } from "@/lib/i18n";
 
-type Row = {
-  url: string;
-  alias: string;
-  ok?: boolean;
-  slug?: string;
-  error?: string;
-  /** Gagal pra-validasi client: dilewati, tidak memakan kuota rate limit. */
-  invalid?: boolean;
-};
+type Row = { url: string; alias: string; ok?: boolean; slug?: string; error?: string; invalid?: boolean };
+type T = (key: MsgKey, vars?: Record<string, string | number>) => string;
 
 const ALIAS_RE = /^[a-zA-Z0-9_-]{3,32}$/;
 const MAX_ROWS = 100;
@@ -30,7 +25,7 @@ function isHeader(line: string): boolean {
   return /^\s*(url|target|link)\s*[,;]/i.test(line);
 }
 
-function parseCsv(text: string): { rows: Row[]; truncated: number } {
+function parseCsv(text: string, t: T): { rows: Row[]; truncated: number } {
   const lines = text
     .split(/\r?\n/)
     .map((l) => l.trim())
@@ -51,19 +46,19 @@ function parseCsv(text: string): { rows: Row[]; truncated: number } {
   for (const r of rows) {
     if (!r.url) {
       r.invalid = true;
-      r.error = "URL kosong";
+      r.error = t("errEmptyUrl");
     } else if (!validUrl(r.url)) {
       r.invalid = true;
-      r.error = "URL tidak valid (butuh http(s)://)";
+      r.error = t("errBadUrl");
     } else if (seenUrl.has(r.url.toLowerCase())) {
       r.invalid = true;
-      r.error = "Duplikat di file";
+      r.error = t("errDupUrl");
     } else if (r.alias && !ALIAS_RE.test(r.alias)) {
       r.invalid = true;
-      r.error = "Alias 3-32 char: huruf, angka, - _";
+      r.error = t("errBadAlias");
     } else if (r.alias && seenAlias.has(r.alias.toLowerCase())) {
       r.invalid = true;
-      r.error = "Alias duplikat di file";
+      r.error = t("errDupAlias");
     }
     if (!r.invalid) {
       seenUrl.add(r.url.toLowerCase());
@@ -75,6 +70,7 @@ function parseCsv(text: string): { rows: Row[]; truncated: number } {
 
 export default function BulkCreate() {
   const router = useRouter();
+  const t = useT();
   const [rows, setRows] = useState<Row[]>([]);
   const [truncated, setTruncated] = useState(0);
   const [running, setRunning] = useState(false);
@@ -86,7 +82,7 @@ export default function BulkCreate() {
     if (!f) return;
     const reader = new FileReader();
     reader.onload = () => {
-      const { rows, truncated } = parseCsv(String(reader.result));
+      const { rows, truncated } = parseCsv(String(reader.result), t);
       setRows(rows);
       setTruncated(truncated);
       setDone(0);
@@ -123,7 +119,7 @@ export default function BulkCreate() {
           out[i] = { ...out[i], ok: false, error: data.error ?? `HTTP ${res.status}` };
         }
       } catch {
-        out[i] = { ...out[i], ok: false, error: "Network" };
+        out[i] = { ...out[i], ok: false, error: t("network") };
       }
       n++;
       setRows([...out]);
@@ -134,8 +130,8 @@ export default function BulkCreate() {
     const failCount = out.filter((r) => r.ok === false && !r.invalid).length;
     const skipCount = out.filter((r) => r.invalid).length;
     setSummary(
-      `Selesai: ${okCount} berhasil, ${failCount} gagal` +
-        (skipCount > 0 ? `, ${skipCount} dilewati (tidak valid)` : "") +
+      t("doneSummary", { ok: okCount, fail: failCount }) +
+        (skipCount > 0 ? t("skipSuffix", { n: skipCount }) : "") +
         "."
     );
     router.refresh();
@@ -143,16 +139,14 @@ export default function BulkCreate() {
 
   return (
     <div className="qr-card p-5">
-      <h2 className="font-semibold">Bulk create (CSV)</h2>
+      <h2 className="font-semibold">{t("bulkTitle")}</h2>
       <p className="mt-1 text-xs text-zinc-400">
-        Format: url,alias (baris pertama boleh header). Max {MAX_ROWS}{" "}
-        baris/batch. Rate limit 20/jam tetap berlaku — baris tidak valid
-        ditandai sebelum dikirim agar tidak memakan kuota.
+        {t("bulkDesc", { max: MAX_ROWS })}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <label className="qr-file text-sm">
           <input type="file" accept=".csv,.txt" onChange={onFile} />
-          {rows.length > 0 ? "Ganti file" : "Pilih CSV"}
+          {rows.length > 0 ? t("changeFile") : t("pickFile")}
         </label>
         {validCount > 0 && (
           <button
@@ -161,15 +155,14 @@ export default function BulkCreate() {
             className="qr-btn text-sm disabled:opacity-50"
           >
             {running
-              ? `${done}/${validCount}...`
-              : `Buat ${validCount} link`}
+              ? t("running", { done, total: validCount })
+              : t("makeLinks", { n: validCount })}
           </button>
         )}
       </div>
       {truncated > 0 && (
         <p className="mt-2 text-xs text-amber-400">
-          File melebihi {MAX_ROWS} baris — {truncated} baris terakhir
-          diabaikan. Pecah jadi beberapa file.
+          {t("truncated", { max: MAX_ROWS, n: truncated })}
         </p>
       )}
       {summary && <p className="mt-2 text-xs text-zinc-400">{summary}</p>}
@@ -184,10 +177,10 @@ export default function BulkCreate() {
                   <td className="p-1">
                     {r.invalid ? (
                       <span className="text-amber-400">
-                        dilewati: {r.error}
+                        {t("statusSkipped")}: {r.error}
                       </span>
                     ) : r.ok === undefined ? (
-                      <span className="text-zinc-400">antre</span>
+                      <span className="text-zinc-400">{t("statusQueue")}</span>
                     ) : r.ok ? (
                       <span className="text-green-400">/r/{r.slug}</span>
                     ) : (

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toPngDataUrl, toFancySvg } from "@/lib/qr";
+import { useT } from "@/components/LocaleProvider";
 
 function drawLogo(img: HTMLImageElement, png: string): Promise<string> {
   return new Promise((resolve) => {
@@ -49,6 +50,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     img.src = src;
   });
 }
+
 function withFrame(png: string, caption: string, size: number): Promise<string> {
   return new Promise((resolve) => {
     const qr = new Image();
@@ -81,6 +83,7 @@ export default function QrStaticForm({
   onGenerated?: () => void;
   disabled?: boolean;
 } = {}) {
+  const t = useT();
   const [text, setText] = useState("");
   const [color, setColor] = useState("#000000");
   const [bg, setBg] = useState("#ffffff");
@@ -107,7 +110,7 @@ export default function QrStaticForm({
         try {
           logo = await loadImage(logoPreview);
         } catch {
-          setGenError("Logo gagal dibaca, coba file lain.");
+          setGenError(t("logoFail"));
           return;
         }
         let done = await drawLogo(logo, out);
@@ -119,7 +122,7 @@ export default function QrStaticForm({
       }
       onGenerated?.();
     } catch {
-      setGenError("Gagal membuat QR, coba lagi.");
+      setGenError(t("genFail"));
     } finally {
       setGenerating(false);
     }
@@ -175,26 +178,26 @@ export default function QrStaticForm({
 
   return (
     <div className="qr-card p-5">
-      <h2 className="font-semibold">Static QR</h2>
+      <h2 className="font-semibold">{t("staticTitle")}</h2>
       <div className="mt-3 flex flex-col gap-2">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="URL / teks / WiFi / vCard..."
+          placeholder={t("urlPh")}
           className="qr-input"
         />
         <div className="flex flex-wrap gap-2">
           <label className="qr-swatch">
             <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
-            Warna
+            {t("colorFg")}
           </label>
           <label className="qr-swatch">
             <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} />
-            Latar
+            {t("colorBg")}
           </label>
           <label className="qr-file">
             <input type="file" accept="image/*" onChange={onLogo} />
-            {logoPreview ? "Ganti logo" : "＋ Logo"}
+            {logoPreview ? t("changeLogo") : t("addLogo")}
           </label>
           {logoPreview && (
             <button
@@ -202,20 +205,20 @@ export default function QrStaticForm({
               onClick={() => setLogoPreview("")}
               className="qr-btn-ghost !py-1.5 text-xs text-red-400"
             >
-              Hapus logo
+              {t("removeLogo")}
             </button>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <label className="flex items-center gap-1">
             <input type="checkbox" checked={frame} onChange={(e) => setFrame(e.target.checked)} />
-            Frame
+            {t("frame")}
           </label>
           {frame && (
             <input
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              placeholder="Teks frame"
+              placeholder={t("framePh")}
               className="qr-input w-32 text-sm"
             />
           )}
@@ -235,7 +238,7 @@ export default function QrStaticForm({
               key={e}
               type="button"
               onClick={() => setEcc(e)}
-              title={`Koreksi error ${e}`}
+              title={`ECC ${e}`}
               disabled={!text.trim() || disabled}
               className={
                 (e === ecc ? "qr-btn" : "qr-btn-ghost") +
@@ -250,20 +253,16 @@ export default function QrStaticForm({
             disabled={!text.trim() || disabled || generating}
             className="qr-btn disabled:opacity-50"
           >
-            {generating ? "Membuat…" : "Buat"}
+            {generating ? t("making") : t("make")}
           </button>
         </div>
-        {genError && (
-          <p className="text-xs text-red-400">{genError}</p>
-        )}
+        {genError && <p className="text-xs text-red-400">{genError}</p>}
         {logoPreview && ecc === "H" && (
-          <p className="text-xs text-lime-300">
-            Logo aktif + ECC H — siap scan.
-          </p>
+          <p className="text-xs text-lime-300">{t("logoOk")}</p>
         )}
         {logoPreview && ecc !== "H" && (
           <p className="text-xs text-amber-400">
-            Logo + ECC {ecc} berisiko gagal scan — disarankan H.
+            {t("logoWarn", { ecc })}
           </p>
         )}
       </div>
@@ -271,13 +270,13 @@ export default function QrStaticForm({
       {png && (
         <div className="mt-4 flex items-start gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={png} alt="QR" className="h-48 w-48 border" />
+          <img src={png} alt={t("qrAlt")} className="h-48 w-48 border" />
           <div className="flex flex-col gap-2">
             <button onClick={() => download(png, `qr-${size}.png`)} className="qr-btn">
-              PNG {size}px
+              {t("dlPng", { size })}
             </button>
             <button onClick={downloadSvg} className="qr-btn-ghost">
-              SVG
+              {t("dlSvg")}
             </button>
           </div>
         </div>

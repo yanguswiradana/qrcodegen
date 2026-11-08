@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useT } from "@/components/LocaleProvider";
 
 export default function QrDynamicForm() {
+  const t = useT();
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [name, setName] = useState("");
@@ -30,7 +32,7 @@ export default function QrDynamicForm() {
     setResult("");
     setCopied(false);
     if (!validTarget(url)) {
-      setError("URL tidak valid (butuh http(s)://).");
+      setError(t("badUrl"));
       return;
     }
     setLoading(true);
@@ -41,7 +43,7 @@ export default function QrDynamicForm() {
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) return setError(data.error ?? "Gagal");
+    if (!res.ok) return setError(data.error ?? t("failed"));
     setResult(`${location.origin}/r/${data.slug}`);
     setAlias("");
     setExpiresAt("");
@@ -56,31 +58,32 @@ export default function QrDynamicForm() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError("Gagal menyalin otomatis, salin manual.");
+      setError(t("copyFail"));
     }
   }
+
   return (
     <div className="qr-card p-5">
-      <h2 className="font-semibold">Dynamic QR + short link</h2>
+      <h2 className="font-semibold">{t("dynTitle")}</h2>
       <form onSubmit={submit} className="mt-3 flex flex-col gap-2">
         <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           required
-          placeholder="https://tujuan..."
+          placeholder={t("urlPh2")}
           className="qr-input"
         />
         <div className="flex gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Nama (opsional)"
+            placeholder={t("namePh")}
             className="qr-input flex-1"
           />
           <input
             value={alias}
             onChange={(e) => setAlias(e.target.value)}
-            placeholder="alias (opsional)"
+            placeholder={t("aliasPh")}
             className="qr-input w-36 font-mono text-sm"
           />
         </div>
@@ -94,25 +97,28 @@ export default function QrDynamicForm() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password link (opsional)"
+          placeholder={t("pwPh")}
           className="qr-input text-sm"
         />
         <button disabled={loading} className="qr-btn disabled:opacity-50">
-          {loading ? "Membuat..." : "Buat link + QR"}
+          {loading ? t("submitting") : t("submit")}
         </button>
       </form>
       {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
       {result && (
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
           <p>
-            Jadi: <a href={result} className="underline" target="_blank">{result}</a>
+            {t("resultPrefix")}{" "}
+            <a href={result} className="underline" target="_blank">
+              {result}
+            </a>
           </p>
           <button
             type="button"
             onClick={copyResult}
             className="qr-btn-ghost px-2 py-1 text-xs"
           >
-            {copied ? "Disalin!" : "Salin"}
+            {copied ? t("copied") : t("copy")}
           </button>
         </div>
       )}

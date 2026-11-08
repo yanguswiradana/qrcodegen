@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
+import { LOCALE_COOKIE } from "@/lib/i18n";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,10 +39,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const c = await cookies();
+  const lang = c.get(LOCALE_COOKIE)?.value === "en" ? "en" : "id";
   return (
     <html
-      lang="id"
+      lang={lang}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

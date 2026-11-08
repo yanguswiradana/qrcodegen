@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { getLocale } from "@/lib/locale-server";
+import { dateLocale, tx } from "@/lib/i18n";
 
 export default async function ScansPanel() {
+  const locale = await getLocale();
+  const t = (k: Parameters<typeof tx>[1]) => tx(locale, k);
   const supabase = await createClient();
   const { data } = await supabase
     .from("scans")
@@ -10,7 +14,7 @@ export default async function ScansPanel() {
 
   const rows = data ?? [];
   if (rows.length === 0) {
-    return <p className="mt-4 text-sm text-zinc-400">Belum ada scan.</p>;
+    return <p className="mt-4 text-sm text-zinc-400">{t("noScans")}</p>;
   }
 
   function breakdown(get: (r: (typeof rows)[number]) => string) {
@@ -22,31 +26,29 @@ export default async function ScansPanel() {
       .join(" · ");
   }
 
-  const byDevice = breakdown((r) => r.device ?? "unknown");
-  const byBrowser = breakdown((r) => r.browser ?? "unknown");
-  const byCountry = breakdown((r) => r.country ?? "unknown");
+  const byDevice = breakdown((r) => r.device ?? t("unknown"));
+  const byBrowser = breakdown((r) => r.browser ?? t("unknown"));
+  const byCountry = breakdown((r) => r.country ?? t("unknown"));
 
   return (
     <div className="mt-4">
-      <p className="text-sm text-zinc-400">
-        30 scan terakhir
-      </p>
-      <p className="mt-1 text-xs text-zinc-500">
-        Device — {byDevice}
+      <p className="text-sm text-zinc-400">{t("recentScans")}</p>
+      <p className="mt-1 text-xs text-zinc-400">
+        {t("byDevice")} — {byDevice}
         <br />
-        Browser — {byBrowser}
+        {t("byBrowser")} — {byBrowser}
         <br />
-        Negara — {byCountry}
+        {t("byCountry")} — {byCountry}
       </p>
       <div className="mt-2 overflow-x-auto qr-card">
         <table className="w-full text-sm qr-table">
           <thead>
             <tr className="text-left">
-              <th>Slug</th>
-              <th>Device</th>
-              <th>Browser</th>
-              <th>Negara</th>
-              <th>Waktu</th>
+              <th>{t("colSlug")}</th>
+              <th>{t("colDevice")}</th>
+              <th>{t("colBrowser")}</th>
+              <th>{t("colCountry")}</th>
+              <th>{t("colTime")}</th>
             </tr>
           </thead>
           <tbody>
@@ -59,7 +61,7 @@ export default async function ScansPanel() {
                 <td>{r.browser ?? "-"}</td>
                 <td>{r.country ?? "-"}</td>
                 <td className="max-w-48 truncate text-xs">
-                  {new Date(r.created_at).toLocaleString("id-ID")}
+                  {new Date(r.created_at).toLocaleString(dateLocale(locale))}
                 </td>
               </tr>
             ))}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useT } from "@/components/LocaleProvider";
+import { dateLocale } from "@/lib/i18n";
 
 type Key = {
   id: string;
@@ -11,6 +13,9 @@ type Key = {
 };
 
 export default function ApiKeys() {
+  const t = useT();
+  const { locale } = useLocale();
+  const dl = dateLocale(locale);
   const [keys, setKeys] = useState<Key[]>([]);
   const [name, setName] = useState("");
   const [fresh, setFresh] = useState("");
@@ -34,7 +39,7 @@ export default function ApiKeys() {
       body: JSON.stringify({ name: name || "default" }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) return setMsg(data.error ?? "Gagal");
+    if (!res.ok) return setMsg(data.error ?? t("failed"));
     setFresh(data.api_key);
     setName("");
     load();
@@ -47,11 +52,12 @@ export default function ApiKeys() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setMsg("Gagal menyalin otomatis, salin manual.");
+      setMsg(t("copyFail2"));
     }
   }
+
   async function remove(id: string) {
-    if (!confirm("Hapus key ini? Integrasi yang pakai ikut mati.")) return;
+    if (!confirm(t("delKeyConfirm"))) return;
     await fetch(`/api/keys?id=${id}`, { method: "DELETE" });
     load();
   }
@@ -65,7 +71,7 @@ export default function ApiKeys() {
         }}
         className="qr-btn-ghost text-sm"
       >
-        API keys
+        {t("keysBtn")}
       </button>
     );
   }
@@ -73,43 +79,38 @@ export default function ApiKeys() {
   return (
     <div className="qr-card p-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">API keys</h2>
+        <h2 className="text-lg font-semibold">{t("keysTitle")}</h2>
         <button onClick={() => setOpen(false)} className="text-sm text-zinc-400">
-          Tutup
+          {t("close")}
         </button>
       </div>
       <p className="mt-1 text-xs text-zinc-400">
-        Header: Authorization: Bearer qrgen_... — contoh: POST /api/links
-        dengan {"{target_url}"}.
+        {t("keysDesc", { target_url: "{target_url}" })}
       </p>
       <div className="mt-3 flex gap-2">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Nama key"
+          placeholder={t("keyNamePh")}
           className="qr-input text-sm"
         />
         <button onClick={create} className="qr-btn text-sm">
-          Buat
+          {t("create")}
         </button>
       </div>
       {fresh && (
         <>
           <div className="mt-2 flex items-start gap-2 rounded border border-[var(--line)] bg-black/40 p-2">
-            <p className="flex-1 break-all font-mono text-xs">
-              {fresh}
-            </p>
+            <p className="flex-1 break-all font-mono text-xs">{fresh}</p>
             <button
               type="button"
               onClick={copyFresh}
               className="qr-btn-ghost shrink-0 px-2 py-1 text-xs"
             >
-              {copied ? "Disalin!" : "Salin"}
+              {copied ? t("copied") : t("copy")}
             </button>
           </div>
-          <p className="mt-1 text-xs text-amber-400">
-            Salin sekarang, key tidak tampil lagi.
-          </p>
+          <p className="mt-1 text-xs text-amber-400">{t("copyNow")}</p>
         </>
       )}
       {msg && <p className="mt-2 text-sm text-red-400">{msg}</p>}
@@ -120,24 +121,27 @@ export default function ApiKeys() {
               {k.prefix}... · {k.name}
             </p>
             <p className="mt-0.5 text-[11px] text-zinc-400">
-              Dibuat{" "}
-              {new Date(k.created_at).toLocaleDateString("id-ID", {
+              {t("madeAt")}{" "}
+              {new Date(k.created_at).toLocaleDateString(dl, {
                 day: "numeric",
                 month: "short",
                 year: "numeric",
               })}{" "}
               ·{" "}
               {k.last_used_at
-                ? `dipakai ${new Date(k.last_used_at).toLocaleDateString("id-ID", {
+                ? `${t("usedAt")} ${new Date(k.last_used_at).toLocaleDateString(dl, {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
                   })}`
-                : "belum pernah dipakai"}
+                : t("neverUsed")}
             </p>
           </div>
-          <button onClick={() => remove(k.id)} className="shrink-0 text-xs text-red-400">
-            Hapus
+          <button
+            onClick={() => remove(k.id)}
+            className="shrink-0 text-xs text-red-400"
+          >
+            {t("rowDelete")}
           </button>
         </div>
       ))}

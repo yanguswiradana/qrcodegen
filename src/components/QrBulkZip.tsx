@@ -4,9 +4,11 @@ import { useState } from "react";
 import JSZip from "jszip";
 import { toPngDataUrl } from "@/lib/qr";
 import { shortBase } from "@/lib/short";
+import { useT } from "@/components/LocaleProvider";
 
 // Unduh ZIP semua link yang cocok filter (maks 200, bukan cuma halaman ini).
 export default function QrBulkZip({ query }: { query: string }) {
+  const t = useT();
   const [zipping, setZipping] = useState(false);
   const [progress, setProgress] = useState("");
 
@@ -23,7 +25,7 @@ export default function QrBulkZip({ query }: { query: string }) {
         (l: { slug: string }) => l.slug
       );
       if (slugs.length === 0) {
-        setProgress("tidak ada");
+        setProgress(t("zipEmpty"));
         return;
       }
       const zip = new JSZip();
@@ -53,10 +55,10 @@ export default function QrBulkZip({ query }: { query: string }) {
     <button
       onClick={downloadZip}
       disabled={zipping}
-      title="Unduh semua QR yang cocok filter sebagai ZIP (maks 200)"
+      title={t("zipBtn")}
       className="qr-btn-ghost px-3 py-1 text-sm disabled:opacity-50"
     >
-      {zipping ? `Menyiapkan ${progress}…` : "Unduh ZIP"}
+      {zipping ? t("zipPreparing", { p: progress }) : t("zipBtn")}
     </button>
   );
 }

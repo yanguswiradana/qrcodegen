@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getLocale } from "@/lib/locale-server";
+import { dateLocale, tx } from "@/lib/i18n";
 
 type Stats = {
   slug: string;
@@ -19,6 +21,9 @@ export default async function StatsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const locale = await getLocale();
+  const t = (k: Parameters<typeof tx>[1]) => tx(locale, k);
+  const dl = dateLocale(locale);
   const supabase = await createClient();
   const { data } = await supabase.rpc("link_stats", { p_slug: slug });
 
@@ -34,7 +39,7 @@ export default async function StatsPage({
     const key = d.toISOString().slice(0, 10);
     days.push({
       key,
-      label: d.toLocaleDateString("id-ID", { day: "numeric", month: "short" }),
+      label: d.toLocaleDateString(dl, { day: "numeric", month: "short" }),
       count: row.daily?.[key] ?? 0,
     });
   }
@@ -55,15 +60,19 @@ export default async function StatsPage({
   return (
     <main className="mx-auto max-w-xl px-6 py-16">
       <p className="font-mono text-sm text-zinc-400">/r/{row.slug}</p>
-      <h1 className="mt-1 text-3xl font-bold">{row.clicks} scan</h1>
+      <h1 className="mt-1 text-3xl font-bold">
+        {locale === "en"
+          ? `${row.clicks} scan${row.clicks === 1 ? "" : "s"}`
+          : `${row.clicks} scan`}
+      </h1>
       <p className="mt-1 truncate text-sm text-zinc-400">{row.target_url}</p>
       <p className="mt-1 text-xs text-zinc-400">
-        Dibuat {new Date(row.created_at).toLocaleDateString("id-ID")}
+        {t("createdOn")} {new Date(row.created_at).toLocaleDateString(dl)}
         {devices.length > 0 &&
           " · " + devices.map(([k, v]) => `${k}: ${v}`).join(" · ")}
       </p>
-      {breakdownLine("Browser", browsers)}
-      {breakdownLine("Negara", countries)}
+      {breakdownLine(t("byBrowser"), browsers)}
+      {breakdownLine(t("byCountry"), countries)}
 
       <div className="mt-6 flex h-28 items-end gap-2">
         {days.map((d) => (
@@ -80,15 +89,13 @@ export default async function StatsPage({
 
       <div className="mt-8 flex gap-3 text-sm">
         <a href={`/r/${row.slug}`} className="qr-btn">
-          Buka link
+          {t("openLink")}
         </a>
         <Link href="/" className="qr-btn-ghost">
-          Buat punyamu
+          {t("makeYours")}
         </Link>
       </div>
-      <p className="mt-6 text-xs text-zinc-400">
-        Dibuat dengan QRGen — self-hostable (MIT).
-      </p>
+      <p className="mt-6 text-xs text-zinc-400">{t("madeWith")}</p>
     </main>
   );
 }

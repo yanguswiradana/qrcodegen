@@ -1,6 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { getLocale } from "@/lib/locale-server";
+import { dateLocale, tx } from "@/lib/i18n";
 
 export default async function ScansChart() {
+  const locale = await getLocale();
+  const t = (k: Parameters<typeof tx>[1]) => tx(locale, k);
+  const dl = dateLocale(locale);
   const supabase = await createClient();
   // Dibaca sekali per render request — stabil selama render ini.
   // eslint-disable-next-line react-hooks/purity
@@ -16,7 +21,7 @@ export default async function ScansChart() {
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now - i * 864e5);
     days.push({
-      label: d.toLocaleDateString("id-ID", { weekday: "short" }),
+      label: d.toLocaleDateString(dl, { weekday: "short" }),
       count: 0,
     });
   }
@@ -28,7 +33,7 @@ export default async function ScansChart() {
 
   return (
     <div className="mt-4 qr-card p-5">
-      <h3 className="text-lg font-semibold">Scan 7 hari</h3>
+      <h3 className="text-lg font-semibold">{t("weekTitle")}</h3>
       <div className="mt-3 flex h-28 items-end gap-2">
         {days.map((d) => (
           <div key={d.label} className="flex flex-1 flex-col items-center gap-1">

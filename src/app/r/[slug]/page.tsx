@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { getLocale } from "@/lib/locale-server";
+import { tx } from "@/lib/i18n";
 import PasswordGate from "@/components/PasswordGate";
 import LinkExpired from "@/components/LinkExpired";
 
@@ -49,6 +51,7 @@ export default async function RedirectPage({
 }) {
   const { slug } = await params;
   const { pw } = await searchParams;
+  const locale = await getLocale();
   const h = await headers();
   const ua = h.get("user-agent") ?? "";
   const ip =
@@ -82,7 +85,7 @@ export default async function RedirectPage({
       return (
         <PasswordGate
           slug={slug}
-          error="Password salah atau terlalu banyak percobaan, coba lagi nanti."
+          error={tx(locale, "pwLocked")}
         />
       );
   }
