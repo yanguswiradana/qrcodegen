@@ -9,6 +9,8 @@ type Stats = {
   created_at: string;
   by_device: Record<string, number>;
   daily: Record<string, number>;
+  by_country: Record<string, number>;
+  by_browser: Record<string, number>;
 };
 
 export default async function StatsPage({
@@ -38,6 +40,17 @@ export default async function StatsPage({
   }
   const max = Math.max(1, ...days.map((d) => d.count));
   const devices = Object.entries(row.by_device ?? {});
+  const countries = Object.entries(row.by_country ?? {});
+  const browsers = Object.entries(row.by_browser ?? {});
+
+  function breakdownLine(label: string, entries: [string, number][]) {
+    if (entries.length === 0) return null;
+    return (
+      <p className="mt-1 text-xs text-zinc-400">
+        {label}: {entries.map(([k, v]) => `${k} ${v}`).join(" · ")}
+      </p>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-xl px-6 py-16">
@@ -49,6 +62,8 @@ export default async function StatsPage({
         {devices.length > 0 &&
           " · " + devices.map(([k, v]) => `${k}: ${v}`).join(" · ")}
       </p>
+      {breakdownLine("Browser", browsers)}
+      {breakdownLine("Negara", countries)}
 
       <div className="mt-6 flex h-28 items-end gap-2">
         {days.map((d) => (

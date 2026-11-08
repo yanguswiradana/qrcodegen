@@ -11,7 +11,23 @@ function deviceOf(ua: string) {
   return "desktop";
 }
 
-async function track(slug: string, ua: string, ip: string | undefined) {
+function browserOf(ua: string) {
+  const u = ua.toLowerCase();
+  if (/edg|edge/.test(u)) return "Edge";
+  if (/opr|opera/.test(u)) return "Opera";
+  if (/chrome|crios/.test(u)) return "Chrome";
+  if (/fxios|firefox/.test(u)) return "Firefox";
+  if (/safari/.test(u)) return "Safari";
+  return "Lainnya";
+}
+
+async function track(
+  slug: string,
+  ua: string,
+  ip: string | undefined,
+  browser: string | undefined,
+  country: string | undefined
+) {
   const supabase = await createClient();
   await supabase.rpc("resolve_link", {
     p_slug: slug,
@@ -19,6 +35,8 @@ async function track(slug: string, ua: string, ip: string | undefined) {
     p_ua: ua.slice(0, 500),
     p_device: deviceOf(ua),
     p_ip: ip?.slice(0, 64) ?? null,
+    p_browser: browser ?? null,
+    p_country: country ?? null,
   });
 }
 
@@ -36,6 +54,7 @@ export default async function RedirectPage({
   const ip =
     h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     h.get("x-real-ip");
+  const country = h.get("x-vercel-ip-country")?.trim() || undefined;
 
   const supabase = await createClient();
 
@@ -68,6 +87,6 @@ export default async function RedirectPage({
       );
   }
 
-  await track(slug, ua, ip ?? undefined);
+  await track(slug, ua, ip ?? undefined, browserOf(ua), country);
   redirect(link.target_url);
 }
