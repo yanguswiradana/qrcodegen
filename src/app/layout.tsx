@@ -13,8 +13,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "QRGen — QR Code + Short Link",
-  description: "Static QR instan, dynamic QR + short link dengan tracking scan. Self-hostable.",
+  metadataBase: new URL("https://qrcodegen-arxcode.vercel.app"),
+  title: {
+    default: "QRGen — QR Code + Short Link",
+    template: "%s · QRGen",
+  },
+  description:
+    "Static QR instan (URL, teks, WiFi, vCard) + dynamic QR dan short link dengan tracking scan. Self-hostable, MIT.",
+  openGraph: {
+    title: "QRGen — QR + short link, satu tempat.",
+    description:
+      "Static QR instan → PNG/SVG. Dynamic QR + short link dengan expiry, password, dan tracking scan.",
+    url: "/",
+    siteName: "QRGen",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "QRGen — QR + short link, satu tempat.",
+    description:
+      "Static QR instan → PNG/SVG. Dynamic QR + short link dengan tracking scan.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
