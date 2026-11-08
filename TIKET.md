@@ -13,6 +13,9 @@
 > Keputusan owner 2026-11-08 (diterapkan): D=negara dari header Vercel saja
 > (gratis, kasar); F=embed PNG berlogo/frame di dalam SVG (QR tetap vektor);
 > G=skrip `npm run smoke` ringan (Playwright bila regresi kejadian lagi).
+> Keputusan owner 2026-11-08 ronde 2: H=pajangan → hapus env short-domain;
+> I=bilingual (kerjakan); K=tetap 3x localStorage; L=purge scan >3 bulan;
+> #6 kerjakan sekarang.
 
 ## P0 — Wajib duluan (rusak / basi cepat)
 
@@ -154,8 +157,15 @@
 - Export CSV semua link+scan, hapus akun + cascade. Estimasi M.
   Butuh bahasan: apakah perlu untuk portfolio/demo?
 
-### T-14 — Bilingual ID/EN
-- Estimasi M–L. Butuh bahasan-I. Jangan mulai sebelum diputuskan.
+### T-14 — Bilingual ID/EN [DIPUTUSKAN 2026-11-08: kerjakan]
+- Kamus `id`/`en` + toggle + cookie `qrgen_locale` (server baca cookie).
+  Estimasi M–L.
+
+### T-15 — Purge scan >3 bulan (keputusan L 2026-11-08)
+- RPC `purge_old_scans()` + cron harian (Vercel Cron → `/api/maintenance/purge`,
+  guard `CRON_SECRET`). Total klik awet (`links.clicks` tak tersentuh);
+  breakdown device/browser/negara = trailing 3 bulan. Window 1 baris bila
+  mau diubah. Estimasi S.
 
 ---
 

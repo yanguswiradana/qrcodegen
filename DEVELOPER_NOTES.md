@@ -35,7 +35,7 @@ URL `https://nmshwrptczkuxhwpoyky.supabase.co`, project ref `nmshwrptczkuxhwpoyk
 - Komponen: `QrStaticForm` (warna/logo/frame/caption/ukuran 256–1024),
   `QrDynamicForm`, `BulkCreate` (CSV max 100), `LinksList` (server, fetch) →
   `LinksTable` (client, tabel), `LinkRowActions`, `QrDownloadButton`
-  (pakai `shortBase()` → env `NEXT_PUBLIC_SHORT_DOMAIN` bila diset),
+  (pakai `shortBase()` = origin runtime),
   `ScansChart`, `ScansPanel`, `ApiKeys`, `PasswordGate`, `FreeQrGate`.
 - `src/lib/`: `qr.ts` (`toPngDataUrl`/`toSvg`), `slug.ts`, `short.ts`,
   `supabase/{client,server,middleware}.ts`.
@@ -133,4 +133,5 @@ BUKAN sumber migrasi (jangan push ulang — policy duplikat).
   ada sinyal abuse.
 - Login/dashboard disembunyikan dari publik; owner akses manual.
 - OSS MIT + demo Vercel sebagai portfolio (hybrid, bukan SaaS berbayar).
-- `NEXT_PUBLIC_SHORT_DOMAIN` opsional untuk QR download domain custom.
+- Short domain custom: TIDAK dipakai (keputusan 2026-11-08) — env
+  `NEXT_PUBLIC_SHORT_DOMAIN` dicabut; `shortBase()` = origin runtime.

@@ -94,7 +94,7 @@ curl -X POST http://localhost:3002/api/keys \
    cp .env.example .env.local
    ```
    Isi `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   (Settings → API; anon = publishable key). Opsional: `NEXT_PUBLIC_SHORT_DOMAIN`.
+   (Settings → API; anon = publishable key).
 4. Migrasi DB (butuh [Supabase CLI](https://supabase.com/docs/guides/cli)):
    ```bash
    npx supabase link --project-ref <REF>
