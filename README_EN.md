@@ -111,7 +111,7 @@ Double confirm in the dashboard. The auth row is also deleted when
    npx supabase link --project-ref <REF>
    npx supabase db push --remote --yes --include-all
    ```
-   17 migrations in `supabase/migrations/` (rate limit, stats, password, API
+   18 migrations in `supabase/migrations/` (rate limit, stats, password, API
    keys, expiry, public redirect, analytics, purge, pagination…). Without the
    CLI: run the migration files one by one in the SQL Editor **in order**.
 5. Supabase Auth: make sure the **Email** provider is ON. Confirm email OFF for dev, ON for prod.
@@ -155,7 +155,7 @@ Note for the next session: read [DEVELOPER_NOTES.md](DEVELOPER_NOTES.md)
 - `src/proxy.ts` — `/dashboard` protection (Next 16: `proxy`, not `middleware`)
 - `src/components/` — QR forms, link table (+ZIP), charts, scan panel
 - `src/lib/` — Supabase client, QR generator (`toFancySvg`), slug, short domain
-- `supabase/migrations/` — 17 sequential migrations (CLI)
+- `supabase/migrations/` — 18 sequential migrations (CLI)
 - `scripts/smoke.mjs` — smoke test
 
 ## License

@@ -111,7 +111,7 @@ Konfirmasi ganda di dashboard. Baris auth ikut terhapus bila
    npx supabase link --project-ref <REF>
    npx supabase db push --remote --yes --include-all
    ```
-   17 migrasi di `supabase/migrations/` (rate limit, stats, password, API
+   18 migrasi di `supabase/migrations/` (rate limit, stats, password, API
    keys, expiry, redirect publik, analytics, purge, pagination…). Alternatif tanpa CLI:
    jalankan file migrasi satu-satu di SQL Editor **berurutan**.
 5. Supabase Auth: pastikan provider **Email** ON. Confirm email OFF untuk dev, ON untuk prod.
@@ -154,7 +154,7 @@ Catatan untuk sesi berikutnya: baca [DEVELOPER_NOTES.md](DEVELOPER_NOTES.md)
 - `src/proxy.ts` — proteksi `/dashboard` (Next 16: `proxy`, bukan `middleware`)
 - `src/components/` — form QR, tabel link (+ZIP), grafik, panel scan
 - `src/lib/` — client Supabase, generator QR (`toFancySvg`), slug, short domain
-- `supabase/migrations/` — 17 migrasi berurutan (CLI)
+- `supabase/migrations/` — 18 migrasi berurutan (CLI)
 - `scripts/smoke.mjs` — smoke test
 
 ## Lisensi
