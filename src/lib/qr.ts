@@ -26,6 +26,16 @@ export function toSvg(text: string, style: QrStyle = {}) {
   });
 }
 
+/**
+ * Jumlah sel per sisi (modul + margin 2, sama seperti default toPngDataUrl/
+ * toSvg). Dipakai agar overlay logo snap ke grid modul (tepi lurus sempurna).
+ */
+export function qrCells(text: string, ecc?: QrStyle["ecc"]): number {
+  const mods = QRCode.create(text, { errorCorrectionLevel: ecc ?? "M" })
+    .modules.size;
+  return mods + 2 * 2;
+}
+
 export type FancySvgOpts = QrStyle & {
   logoDataUrl?: string;
   logoW?: number;
@@ -58,23 +68,24 @@ export async function toFancySvg(
     .replace(/^<svg[^>]*>/, "")
     .replace(/<\/svg>\s*$/, "");
 
+  // Snap ke grid modul: tepi kotak lurus mengikuti kotak-kotak QR.
+  const boxCells = Math.max(3, Math.round(N * 0.24));
+  const bx = Math.round((N - boxCells) / 2);
+  const by = Math.round((N - boxCells) / 2);
   let content = inner;
   if (opts.logoDataUrl && opts.logoW && opts.logoH) {
-    const box = N * 0.24;
-    const x = (N - box) / 2;
-    const y = (N - box) / 2;
-    const pad = box * 0.14;
+    const pad = boxCells * 0.14;
     const s = Math.min(
-      (box - pad * 2) / opts.logoW,
-      (box - pad * 2) / opts.logoH
+      (boxCells - pad * 2) / opts.logoW,
+      (boxCells - pad * 2) / opts.logoH
     );
     const w = opts.logoW * s;
     const h = opts.logoH * s;
-    const lx = x + (box - w) / 2;
-    const ly = y + (box - h) / 2;
+    const lx = bx + (boxCells - w) / 2;
+    const ly = by + (boxCells - h) / 2;
     content +=
-      `<rect x="${x}" y="${y}" width="${box}" height="${box}" ` +
-      `rx="${box * 0.18}" fill="#ffffff"/>` +
+      `<rect x="${bx}" y="${by}" width="${boxCells}" height="${boxCells}" ` +
+      `rx="${boxCells * 0.18}" fill="#ffffff" stroke="#e4e4e7" stroke-width="${N * 0.008}"/>` +
       `<image href="${opts.logoDataUrl}" x="${lx}" y="${ly}" ` +
       `width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"/>`;
   }

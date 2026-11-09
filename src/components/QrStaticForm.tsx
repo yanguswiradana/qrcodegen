@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { toPngDataUrl, toFancySvg } from "@/lib/qr";
+import { toPngDataUrl, toFancySvg, qrCells } from "@/lib/qr";
 import { useT } from "@/components/LocaleProvider";
 
-function drawLogo(img: HTMLImageElement, png: string): Promise<string> {
+function drawLogo(
+  img: HTMLImageElement,
+  png: string,
+  cells: number
+): Promise<string> {
   return new Promise((resolve) => {
     const qr = new Image();
     qr.onload = () => {
@@ -13,11 +17,14 @@ function drawLogo(img: HTMLImageElement, png: string): Promise<string> {
       c.height = qr.height;
       const ctx = c.getContext("2d")!;
       ctx.drawImage(qr, 0, 0);
-      // Kotak putih (quiet zone) di tengah agar logo tidak menempel modul.
+      // Snap ke grid modul: tepi kotak lurus mengikuti kotak-kotak QR.
       // Ukuran ~24% sisi QR: aman untuk ECC H (recovery ±30%).
-      const box = qr.width * 0.24;
-      const x = (qr.width - box) / 2;
-      const y = (qr.height - box) / 2;
+      const cellPx = qr.width / cells;
+      const boxCells = Math.max(3, Math.round(cells * 0.24));
+      const bx = Math.round((cells - boxCells) / 2);
+      const box = boxCells * cellPx;
+      const x = bx * cellPx;
+      const y = bx * cellPx;
       ctx.fillStyle = "#ffffff";
       ctx.beginPath();
       if (typeof ctx.roundRect === "function") {
@@ -26,6 +33,9 @@ function drawLogo(img: HTMLImageElement, png: string): Promise<string> {
         ctx.rect(x, y, box, box);
       }
       ctx.fill();
+      ctx.strokeStyle = "#e4e4e7";
+      ctx.lineWidth = Math.max(1, Math.round(cellPx * 0.12));
+      ctx.stroke();
       // Logo di-fit proporsional (contain), tidak dipaksa persegi.
       const pad = box * 0.14;
       const iw = Math.max(1, box - pad * 2);
@@ -104,6 +114,7 @@ export default function QrStaticForm({
     setGenError("");
     try {
       const style = { color, bg, ecc };
+      const cells = qrCells(text, ecc);
       let out = await toPngDataUrl(text, { ...style, width: size });
       if (logoPreview) {
         let logo: HTMLImageElement;
@@ -113,7 +124,7 @@ export default function QrStaticForm({
           setGenError(t("logoFail"));
           return;
         }
-        let done = await drawLogo(logo, out);
+        let done = await drawLogo(logo, out, cells);
         if (frame) done = await withFrame(done, caption, size);
         setPng(done);
       } else {
