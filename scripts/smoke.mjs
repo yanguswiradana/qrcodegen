@@ -15,7 +15,7 @@ async function check(label, url, opts, expect) {
     failed++;
     return;
   }
-  const ok = expect(res);
+  const ok = await expect(res);
   console.log(`${ok ? "ok  " : "FAIL"} ${label}: ${res.status}`);
   if (!ok) failed++;
 }
@@ -29,10 +29,28 @@ await check("landing /", "/", {}, (r) => r.status === 200);
 await check("login", "/login", {}, (r) => r.status === 200);
 await check("dashboard anon -> /login", "/dashboard", {}, locationIs("/login"));
 await check(
-  "POST /api/links tanpa auth -> 401",
+  "landing EN (cookie)",
+  "/",
+  { headers: { cookie: "qrgen_locale=en" } },
+  async (r) => r.status === 200 && (await r.text()).includes("one place")
+);
+await check(
+  "POST /api/links tanpa auth -> 401 (ID)",
   "/api/links",
   { method: "POST", headers: { "content-type": "application/json" }, body: "{}" },
-  (r) => r.status === 401
+  async (r) =>
+    r.status === 401 && (await r.text()).includes("Login dulu")
+);
+await check(
+  "POST /api/links tanpa auth -> 401 (EN)",
+  "/api/links",
+  {
+    method: "POST",
+    headers: { "content-type": "application/json", cookie: "qrgen_locale=en" },
+    body: "{}",
+  },
+  async (r) =>
+    r.status === 401 && (await r.text()).includes("Please sign in first")
 );
 await check("slug asing -> 404", "/r/smoke-tidak-ada-xyz", {}, (r) => r.status === 404);
 await check("stats asing -> 404", "/s/smoke-tidak-ada-xyz", {}, (r) => r.status === 404);

@@ -7,6 +7,7 @@ import LinksTable from "@/components/LinksTable";
 import ScansPanel from "@/components/ScansPanel";
 import ScansChart from "@/components/ScansChart";
 import ApiKeys from "@/components/ApiKeys";
+import AccountData from "@/components/AccountData";
 import LocaleToggle from "@/components/LocaleToggle";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import { getLocale } from "@/lib/locale-server";
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
             ["bulk", t("navBulk")],
             ["links", t("navLinks")],
             ["scans", t("navScans")],
+            ["account", t("navAccount")],
           ].map(([id, label]) => (
             <a key={id} href={`#${id}`} className="qr-btn-ghost px-3 py-1.5 text-xs">
               {label}
@@ -80,6 +82,11 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold">{t("navScans")}</h2>
           <ScansChart />
           <ScansPanel />
+        </div>
+
+        <div className="mt-8 scroll-mt-6" id="account">
+          <h2 className="text-lg font-semibold">{t("navAccount")}</h2>
+          <AccountData />
         </div>
       </main>
     </LocaleProvider>
