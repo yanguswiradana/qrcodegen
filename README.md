@@ -1,5 +1,7 @@
 # QRGen — QR Code + Short Link (self-hostable)
 
+> English version: [README_EN.md](README_EN.md).
+
 QR generator + short link satu dashboard. Static QR instan, dynamic QR via
 redirect `/r/:slug` dengan tracking scan. Stack: Next.js 16 + Supabase
 (Postgres + Auth).
@@ -26,6 +28,7 @@ Live demo (portfolio): https://qrcodegen-arxcode.vercel.app/
 - Freemium: landing 3x QR anonim per 6 jam (localStorage, pulih otomatis + countdown), login = unlimited
 - Auth: email + password (Supabase)
 - Bilingual ID/EN (toggle, tersimpan di cookie)
+- Akun: export CSV (link + scan), hapus akun + semua data (konfirmasi ganda)
 
 ## API
 
@@ -81,6 +84,13 @@ curl -X POST http://localhost:3002/api/keys \
 # -> {"api_key":"qrgen_...","prefix":"qrgen_..."}   # salin sekarang!
 ```
 
+### `GET /api/account/export?kind=links|scans` — unduh CSV (sesi login saja)
+
+### `DELETE /api/account` — hapus SEMUA data + akun (sesi login saja)
+
+Konfirmasi ganda di dashboard. Baris auth ikut terhapus bila
+`SUPABASE_SERVICE_ROLE_KEY` dikonfigurasi.
+
 ## Self-host (5 menit)
 
 1. Clone + install:
@@ -101,8 +111,8 @@ curl -X POST http://localhost:3002/api/keys \
    npx supabase link --project-ref <REF>
    npx supabase db push --remote --yes --include-all
    ```
-   13 migrasi di `supabase/migrations/` (rate limit, stats, password, API
-   keys, expiry, redirect publik, analytics…). Alternatif tanpa CLI:
+   17 migrasi di `supabase/migrations/` (rate limit, stats, password, API
+   keys, expiry, redirect publik, analytics, purge, pagination…). Alternatif tanpa CLI:
    jalankan file migrasi satu-satu di SQL Editor **berurutan**.
 5. Supabase Auth: pastikan provider **Email** ON. Confirm email OFF untuk dev, ON untuk prod.
 6. Jalankan:
@@ -131,7 +141,7 @@ dan data tak tersentuh:
 ```bash
 npm run dev -- -p 3002   # dev (port 3002, dipakai contoh lain)
 npm run build            # production build
-npm run smoke            # 7 cek rute ke BASE_URL (default localhost:3002)
+npm run smoke            # 9 cek rute + locale ke BASE_URL (default localhost:3002)
 npx tsc --noEmit && npx eslint src/   # wajib 0 sebelum commit
 ```
 
@@ -144,7 +154,7 @@ Catatan untuk sesi berikutnya: baca [DEVELOPER_NOTES.md](DEVELOPER_NOTES.md)
 - `src/proxy.ts` — proteksi `/dashboard` (Next 16: `proxy`, bukan `middleware`)
 - `src/components/` — form QR, tabel link (+ZIP), grafik, panel scan
 - `src/lib/` — client Supabase, generator QR (`toFancySvg`), slug, short domain
-- `supabase/migrations/` — 13 migrasi berurutan (CLI)
+- `supabase/migrations/` — 17 migrasi berurutan (CLI)
 - `scripts/smoke.mjs` — smoke test
 
 ## Lisensi
