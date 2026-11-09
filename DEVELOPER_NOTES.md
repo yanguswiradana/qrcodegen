@@ -110,6 +110,9 @@ BUKAN sumber migrasi (jangan push ulang — policy duplikat).
 - **PostgREST schema cache**: RPC baru kadang 404 `PGRST202` sebentar setelah
   push — tunggu ±1 menit lalu retry, bukan bug kode. Bedakan dengan 404
   `42883` + `digest() does not exist` = search_path salah (nyata, bukan cache).
+- **REVOKE FROM anon tidak cukup bila grant PUBLIC ada** — anon adalah member
+  PUBLIC (Postgres), jadi cabut juga `FROM public` (pelajaran dari grant
+  `check_rate` yang "tidak mempan"). Verifikasi via curl anon langsung.
 - **Anon tidak bisa SELECT links**: RLS "own links" → halaman publik (`/r/`)
   WAJIB lewat RPC definer kolom-minimal, jangan select langsung.
 - **Mode Bearer (API key) tanpa JWT selalu gagal RLS** — INSERT/SELECT
