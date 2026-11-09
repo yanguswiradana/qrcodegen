@@ -89,6 +89,17 @@ Urutan migrasi remote saat ini:
     OUT param bentrok kolom tak berkualifikasi.)
 13. `20261108022931_fix_link_stats_ambiguous2` — kualifikasi `s.created_at`
     dkk dengan alias `s` (pelajaran #3 terulang, jangan diulangi lagi).
+14. `20261108064414_purge_old_scans` — RPC `purge_old_scans()` (hapus scan
+    >3 bulan, total klik awet). TANPA grant publik; dipanggil service_role
+    dari `/api/maintenance/purge` (Vercel Cron + `CRON_SECRET`).
+15. `20261108064608_api_list_links_paged` — `api_list_links` kembalikan
+    jsonb `{links, total}` + filter `q` (escape wildcard) + pagination.
+16. `20261109065259_cleanup_dead_writes` — stop tulis `qr_codes.payload`
+    (dead, tak pernah dibaca) + revoke anon `check_rate`.
+17. `20261109070411_revoke_check_rate_public` — lanjutan #16: revoke `PUBLIC`
+    (anon adalah member PUBLIC, revoke anon saja tak mempan — pelajaran #5).
+18. `20261109133129_drop_qr_payload` — drop kolom `qr_codes.payload`
+    (persetujuan eksplisit owner; nilai = slug, rekonstruksi via links).
 
 File `supabase/schema.sql` + `supabase/migration_002.sql` adalah arsip awal,
 BUKAN sumber migrasi (jangan push ulang — policy duplikat).
